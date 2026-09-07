@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PandaPlanner | BigTreeTech Panda Verse</title>
+    <meta name="description" content="Plan a Bambu Lab or Snapmaker desk: Station, Den, Stack, Perch, AMS, and Panda Verse upgrades the way they actually sit.">
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '1', filter: 'brightness(1)' },
+                            '50%': { opacity: '0.8', filter: 'brightness(1.2)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body class="text-slate-200 font-sans antialiased selection:bg-emerald-500/30">
+    <div id="root"></div>
+
+    <script src="js/data/catalog.js"></script>
+    <script src="js/data/placement.js"></script>
+    <script src="js/layout.js"></script>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
+
+        const Icons = {
+            ChevronLeft: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>,
+            ExternalLink: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>,
+            Check: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
+            Printer: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>,
+            PandaFace: ({className}) => (
+                <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="15" fill="#fff" />
+                    <circle cx="80" cy="20" r="15" fill="#fff" />
+                    <circle cx="50" cy="50" r="40" fill="#fff" />
+                    <ellipse cx="30" cy="45" rx="12" ry="18" fill="#111" transform="rotate(-15 30 45)" />
+                    <ellipse cx="70" cy="45" rx="12" ry="18" fill="#111" transform="rotate(15 70 45)" />
+                    <circle cx="30" cy="42" r="4" fill="#fff" />
+                    <circle cx="70" cy="42" r="4" fill="#fff" />
+                    <ellipse cx="50" cy="60" rx="6" ry="4" fill="#111" />
+                </svg>
+            )
+        };
+
+        function Photo({ src, alt, className }) {
+            const [failed, setFailed] = useState(!src);
+            useEffect(() => { setFailed(!src); }, [src]);
+            if (failed) {
+                return (
+                    <div className={`photo-fallback flex items-center justify-center ${className || ''}`}>
+                        <Icons.Printer className="w-8 h-8 text-emerald-400/70" />
+                    </div>
+                );
+            }
+            return <img src={src} alt={alt} className={className} onError={() => setFailed(true)} />;
+        }
+
+        const SPOOL_COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#f472b6'];
+
+        function SvgDefs() {
+            return (
+                <defs>
+                    <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.18" />
+                        <stop offset="55%" stopColor="#0ea5e9" stopOpacity="0.06" />
+                        <stop offset="100%" stopColor="#082f49" stopOpacity="0.35" />
+                    </linearGradient>
+                    <linearGradient id="metalGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#64748b" />
+                        <stop offset="40%" stopColor="#334155" />
+                        <stop offset="100%" stopColor="#0f172a" />
+                    </linearGradient>
+                    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#1e293b" />
+                        <stop offset="100%" stopColor="#020617" />
+                    </linearGradient>
+                    <linearGradient id="orangeAccent" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#fb923c" />
+                        <stop offset="100%" stopColor="#ea580c" />
+                    </linearGradient>
+                    <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#ef4444" />
+                        <stop offset="33%" stopColor="#10b981" />
+                        <stop offset="66%" stopColor="#3b82f6" />
+                        <stop offset="100%" stopColor="#a855f7" />
+                    </linearGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                    <linearGradient id="deskGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#334155" />
+                        <stop offset="100%" stopColor="#0f172a" />
+                    </linearGradient>
+                    <linearGradient id="popcapGlass" x1="0" y1="0" x2="0.35" y2="1">
+                        <stop offset="0%" stopColor="#e0f2fe" stopOpacity="0.28" />
+                        <stop offset="45%" stopColor="#38bdf8" stopOpacity="0.08" />
+                        <stop offset="100%" stopColor="#0c4a6e" stopOpacity="0.18" />
+                    </linearGradient>
+                    <linearGradient id="u1Metal" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#3f3f46" />
+                        <stop offset="55%" stopColor="#18181b" />
+                        <stop offset="100%" stopColor="#09090b" />
+                    </linearGradient>
+                    <linearGradient id="silverBody" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#cbd5e1" />
+                        <stop offset="45%" stopColor="#94a3b8" />
+                        <stop offset="100%" stopColor="#64748b" />
+                    </linearGradient>
+                    <linearGradient id="charcoalBody" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#334155" />
+                        <stop offset="100%" stopColor="#0f172a" />
+                    </linearGradient>
+                    <linearGradient id="lightFrame" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#e2e8f0" />
+                        <stop offset="55%" stopColor="#cbd5e1" />
+                        <stop offset="100%" stopColor="#94a3b8" />
+                    </linearGradient>
+                    <linearGradient id="u1White" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f8fafc" />
+                        <stop offset="60%" stopColor="#e2e8f0" />
+                        <stop offset="100%" stopColor="#cbd5e1" />
+                    </linearGradient>
+                    <linearGradient id="isoTopLite" x1="0" y1="1" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#94a3b8" />
+                        <stop offset="100%" stopColor="#e2e8f0" />
+                    </linearGradient>
+                    <linearGradient id="isoTopDark" x1="0" y1="1" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#0f172a" />
+                        <stop offset="100%" stopColor="#334155" />
+                    </linearGradient>
+                </defs>
+            );
+        }
+
+        function IsoExtrude({ x, y, w, h, top, side, stroke = '#0f172a' }) {
+            const ix = PP.ISO.x;
+            const iy = PP.ISO.y;
+            return (
+                <g>
+                    <polygon
+                        points={`${x + w},${y} ${x + w + ix},${y - iy} ${x + w + ix},${y - iy + h} ${x + w},${y + h}`}
+                        fill={side}
+                        stroke={stroke}
+                    />
+                    <polygon
+                        points={`${x},${y} ${x + w},${y} ${x + w + ix},${y - iy} ${x + ix},${y - iy}`}
+                        fill={top}
+                        stroke={stroke}
+                    />
+                </g>
+            );
+        }
+
+        function DeskNode({ n }) {
+            return (
+                <g>
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#475569" side="#1e293b" />
+                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="3" fill="url(#deskGrad)" />
+                    <rect x={n.x} y={n.y} width={n.w} height="3" fill="#64748b" opacity="0.5" />
+                </g>
+            );
+        }
+
+        function StationNode({ n }) {
+            const naked = n.variant === 'naked';
+            const toolH = 18;
+            const drawerH = (n.h - toolH - 28) / 2;
+            return (
+                <g>
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#64748b" side="#0f172a" />
+                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="6" fill={naked ? '#1e293b' : '#111827'} stroke="#0f172a" strokeWidth="2" />
+                    {naked && (
+                        <g>
+                            <rect x={n.x + 8} y={n.y + 8} width="8" height={n.h - 16} fill="#334155" />
+                            <rect x={n.x + n.w - 16} y={n.y + 8} width="8" height={n.h - 16} fill="#334155" />
+                        </g>
+                    )}
+                    <rect x={n.x + 10} y={n.y + 8} width={n.w - 20} height={toolH} rx="3" fill="#0f172a" stroke="#334155" />
+                    <rect x={n.x + n.w / 2 - 16} y={n.y + 14} width="32" height="5" rx="2" fill="#64748b" />
+                    {[0, 1].map((i) => (
+                        <g key={i}>
+                            <rect x={n.x + 10} y={n.y + toolH + 16 + i * (drawerH + 6)} width={n.w - 20} height={drawerH} rx="4" fill={naked ? '#0f172a' : '#1e293b'} stroke="#334155" />
+                            <rect x={n.x + n.w / 2 - 20} y={n.y + toolH + 16 + i * (drawerH + 6) + drawerH / 2 - 3} width="40" height="6" rx="3" fill="#64748b" />
+                            {n.showAms && i === 0 && (
+                                <rect x={n.x + 22} y={n.y + toolH + 24} width={n.w - 44} height={drawerH - 16} rx="3" fill="#1e293b" stroke="#22d3ee" strokeWidth="1.5" />
+                            )}
+                        </g>
+                    ))}
+                    {!naked && (
+                        <rect x={n.x + 6} y={n.y + 6} width={n.w - 12} height={n.h - 14} rx="4" fill="url(#glassGrad)" opacity="0.2" />
+                    )}
+                    <circle cx={n.x + 18} cy={n.y + n.h - 7} r="6" fill="#1e293b" stroke="#64748b" />
+                    <circle cx={n.x + n.w - 18} cy={n.y + n.h - 7} r="6" fill="#1e293b" stroke="#64748b" />
+                </g>
+            );
+        }
+
+        function DenNode({ n }) {
+            const h2 = n.variant === 'h2';
+            return (
+                <g>
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#475569" side="#020617" />
+                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="6" fill="#111827" stroke="#334155" strokeWidth="2" />
+                    <rect x={n.x} y={n.y} width={n.w} height="8" fill="#334155" />
+                    <rect x={n.x + 10} y={n.y + 14} width={n.w * 0.42} height={n.h - 24} rx="3" fill="#0f172a" stroke="#1e293b" />
+                    <text x={n.x + 14 + n.w * 0.18} y={n.y + n.h / 2 + 4} textAnchor="middle" fill="#64748b" fontSize="7" fontFamily="ui-monospace, monospace">WASTE</text>
+                    <rect x={n.x + n.w * 0.48} y={n.y + 14} width={n.w * 0.22} height={n.h - 24} rx="2" fill="#1e293b" />
+                    <rect x={n.x + n.w * 0.73} y={n.y + 14} width={n.w * 0.22} height={n.h - 24} rx="2" fill="#1e293b" />
+                    <rect x={n.x + 12} y={n.y + 2} width={n.w - 24} height="4" rx="1" fill="#10b981" filter="url(#glow)" />
+                    {h2 && <text x={n.x + n.w - 10} y={n.y + n.h - 8} textAnchor="end" fill="#f97316" fontSize="7">DEN H2</text>}
+                </g>
+            );
+        }
+
+        function StackNode({ n }) {
+            const hex = [];
+            const inset = n.post + 4;
+            for (let row = 0; row < 7; row++) {
+                for (let col = 0; col < 2; col++) {
+                    hex.push({
+                        x: n.x + 7 + col * 8,
+                        y: n.y + n.shelf + 18 + row * 32
+                    });
+                    hex.push({
+                        x: n.x + n.w - 15 - col * 8,
+                        y: n.y + n.shelf + 18 + row * 32
+                    });
+                }
+            }
+            return (
+                <g>
+                    <IsoExtrude x={n.x - 4} y={n.y} w={n.w + 8} h={n.shelf + 6} top="#64748b" side="#1e293b" />
+                    <rect x={n.x} y={n.y} width={n.post} height={n.h} rx="3" fill="url(#metalGrad)" stroke="#0f172a" />
+                    <rect x={n.x + n.w - n.post} y={n.y} width={n.post} height={n.h} rx="3" fill="url(#metalGrad)" stroke="#0f172a" />
+                    {hex.map((p, i) => (
+                        <polygon
+                            key={i}
+                            points={`${p.x},${p.y - 6} ${p.x + 5},${p.y - 3} ${p.x + 5},${p.y + 3} ${p.x},${p.y + 6} ${p.x - 5},${p.y + 3} ${p.x - 5},${p.y - 3}`}
+                            fill="none"
+                            stroke="#475569"
+                            strokeWidth="1"
+                        />
+                    ))}
+                    <rect x={n.x - 4} y={n.y} width={n.w + 8} height={n.shelf + 6} rx="3" fill="#334155" stroke="#0f172a" />
+                    <rect x={n.x} y={n.y + 2} width={n.w} height="5" fill="#94a3b8" opacity="0.45" />
+                    <rect x={n.x + inset} y={n.trayY} width={n.w - inset * 2} height={n.trayH} rx="4" fill="#1e293b" stroke="#334155" />
+                    <rect x={n.x + n.w / 2 - 22} y={n.trayY + n.trayH - 10} width="44" height="7" rx="3" fill="#64748b" />
+                    <text x={n.x + n.w / 2} y={n.trayY + 14} textAnchor="middle" fill="#64748b" fontSize="9" fontFamily="ui-monospace, monospace">AMS TRAY</text>
+                    <rect x={n.x} y={n.y + n.h - 8} width={n.w} height="8" fill="#334155" />
+                    <text x={n.x + 14} y={n.y + n.h - 12} fill="#64748b" fontSize="8" fontFamily="ui-monospace, monospace">PANDA STACK</text>
+                </g>
+            );
+        }
+
+        function PerchNode({ n }) {
+            return (
+                <g>
+                    <rect x={n.x + 10} y={n.y + n.h} width="5" height="16" fill="#94a3b8" />
+                    <rect x={n.x + n.w - 15} y={n.y + n.h} width="5" height="16" fill="#94a3b8" />
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#cbd5e1" side="#475569" />
+                    <rect x={n.x} y={n.y} width={n.w} height={8} rx="2" fill="#94a3b8" stroke="#0f172a" />
+                    <rect x={n.x + 8} y={n.y + 2} width={n.w - 16} height="4" rx="1" fill="#e2e8f0" />
+                </g>
+            );
+        }
+
+        function FeedRackNode({ n }) {
+            const post = 5;
+            const spoolTiers = 3;
+            const boxTiers = 2;
+            const tierH = (n.h - 16) / (spoolTiers + boxTiers);
+            const spoolColors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#f472b6', '#22d3ee', '#e2e8f0'];
+            return (
+                <g>
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#334155" side="#0f172a" />
+                    <rect x={n.x} y={n.y} width={post} height={n.h} fill="#1e293b" stroke="#0f172a" />
+                    <rect x={n.x + n.w - post} y={n.y} width={post} height={n.h} fill="#1e293b" stroke="#0f172a" />
+                    {Array.from({ length: spoolTiers }).map((_, t) => {
+                        const y = n.y + 10 + t * tierH;
+                        return (
+                            <g key={'s' + t}>
+                                <rect x={n.x} y={y + tierH - 8} width={n.w} height="4" fill="#334155" />
+                                <rect x={n.x} y={y + tierH - 18} width={n.w} height="4" fill="#334155" />
+                                {spoolColors.map((c, i) => (
+                                    <circle key={i} cx={n.x + 16 + i * 20} cy={y + tierH - 22} r="8" fill="none" stroke={c} strokeWidth="4" />
+                                ))}
+                            </g>
+                        );
+                    })}
+                    {Array.from({ length: boxTiers }).map((_, t) => {
+                        const y = n.y + 10 + (spoolTiers + t) * tierH;
+                        return (
+                            <g key={'b' + t}>
+                                <rect x={n.x} y={y + tierH - 6} width={n.w} height="5" fill="#334155" />
+                                {Array.from({ length: 7 }).map((_, i) => (
+                                    <rect
+                                        key={i}
+                                        x={n.x + 10 + i * 23}
+                                        y={y + 10}
+                                        width="18"
+                                        height={tierH - 20}
+                                        rx="1"
+                                        fill="#d6b48a"
+                                        stroke="#a16207"
+                                        transform={`rotate(-18 ${n.x + 19 + i * 23} ${y + tierH - 8})`}
+                                    />
+                                ))}
+                            </g>
+                        );
+                    })}
+                    <rect x={n.x} y={n.y + n.h - 6} width={n.w} height="6" fill="#334155" />
+                </g>
+            );
+        }
+
+        function AmsNode({ n }) {
+            const colors = SPOOL_COLORS;
+            if (n.variant === 'ams_lite') {
+                return (
+                    <g>
+                        <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#334155" side="#020617" />
+                        <rect x={n.x + n.w / 2 - 8} y={n.y} width="16" height={n.h} rx="3" fill="#1e293b" stroke="#334155" />
+                        {[0, 1, 2, 3].map((i) => (
+                            <circle key={i} cx={n.x + n.w / 2} cy={n.y + 16 + i * 26} r="11" fill="none" stroke={colors[i]} strokeWidth="5" />
+                        ))}
+                        {n.guard && [0, 1, 2, 3].map((i) => (
+                            <rect key={'g'+i} x={n.x + n.w - 12} y={n.y + 12 + i * 26} width="7" height="8" rx="1" fill="#f8fafc" filter="url(#glow)" />
+                        ))}
+                    </g>
+                );
+            }
+            if (n.variant === 'ams_ht') {
+                return (
+                    <g>
+                        <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#475569" side="#020617" />
+                        <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="8" fill="#1e293b" stroke="#f97316" strokeWidth="1.5" />
+                        <circle cx={n.x + n.w / 2} cy={n.y + n.h / 2} r="16" fill="none" stroke={colors[n.index % colors.length]} strokeWidth="7" />
+                        <rect x={n.x + 8} y={n.y + 6} width={n.w - 16} height="8" rx="2" fill="#0f172a" />
+                        {n.guard && <rect x={n.x + n.w / 2 - 4} y={n.y + n.h - 12} width="8" height="7" rx="1" fill="#f8fafc" />}
+                    </g>
+                );
+            }
+            if (n.variant === 'ace' || n.variant === 'vivid') {
+                return (
+                    <g>
+                        <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#334155" side="#020617" />
+                        <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="5" fill="#111827" stroke="#64748b" />
+                        {[0, 1, 2, 3].map((i) => (
+                            <rect key={i} x={n.x + 10} y={n.y + 10 + i * 9} width={n.w - 20} height="4" rx="1" fill="#334155" />
+                        ))}
+                        <text x={n.x + n.w / 2} y={n.y + n.h - 8} textAnchor="middle" fill="#94a3b8" fontSize="7">{n.variant === 'ace' ? 'ACE' : 'ViViD'}</text>
+                    </g>
+                );
+            }
+            const slots = 4;
+            const slotW = (n.w - 16) / slots;
+            const pro = n.variant === 'ams_2_pro';
+            return (
+                <g>
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top={pro ? '#1e293b' : '#334155'} side="#020617" />
+                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="6" fill="#1e293b" stroke="#334155" strokeWidth="2" />
+                    <rect x={n.x} y={n.y} width={n.w} height={pro ? 10 : 7} fill="#0f172a" opacity={pro ? 0.85 : 1} />
+                    {Array.from({ length: slots }).map((_, i) => (
+                        <rect key={i} x={n.x + 8 + i * slotW} y={n.y + 14} width={slotW - 6} height={n.h - 22} rx="3" fill={colors[i % colors.length]} opacity="0.85" />
+                    ))}
+                    {n.guard && Array.from({ length: slots }).map((_, i) => (
+                        <rect key={'g'+i} x={n.x + 12 + i * slotW} y={n.y + n.h - 8} width="8" height="7" rx="1" fill="#f8fafc" filter="url(#glow)" />
+                    ))}
+                    {pro && <rect x={n.x + 6} y={n.y + 2} width="20" height="5" rx="1" fill="#22d3ee" />}
+                </g>
+            );
+        }
+
+        function TouchNode({ n }) {
+            const d = 7;
+            return (
+                <g>
+                    <rect x={n.x + n.w / 2 - 3} y={n.y + n.h - 2} width="6" height="16" rx="1" fill="#334155" />
+                    <rect x={n.x + n.w / 2 - 11} y={n.y + n.h + 12} width="22" height="4" rx="2" fill="#1e293b" />
+                    <polygon
+                        points={`${n.x + n.w},${n.y} ${n.x + n.w + d},${n.y + 4} ${n.x + n.w + d},${n.y + n.h + 4} ${n.x + n.w},${n.y + n.h}`}
+                        fill="#052e2b"
+                    />
+                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="4" fill="#111827" stroke="#10b981" strokeWidth="1.4" />
+                    <rect x={n.x + 3} y={n.y + 3} width={n.w - 6} height={n.h - 10} rx="2" fill="#022c22" />
+                    <rect x={n.x + 6} y={n.y + 7} width="8" height={n.h - 20} rx="1" fill="#064e3b" />
+                    <circle cx={n.x + 22} cy={n.y + 14} r="5" fill="none" stroke="#6ee7b7" strokeWidth="1.2" />
+                    <circle cx={n.x + 36} cy={n.y + 14} r="5" fill="none" stroke="#6ee7b7" strokeWidth="1.2" />
+                    <text x={n.x + n.w / 2} y={n.y + n.h - 2} textAnchor="middle" fill="#94a3b8" fontSize="5">BIGTREETECH</text>
+                </g>
+            );
+        }
+
+        function EnclosedPrinter({ n }) {
+            const u = n.upgrades || {};
+            const fam = n.family;
+            const silver = fam === 'x1' || fam === 'p2';
+            const sideGlass = fam === 'h2' || fam === 'x2';
+            const openFront = n.printerId === 'p1p';
+            const dual = n.printerId === 'h2d' || n.printerId === 'h2c';
+            const isoX = PP.ISO.x;
+            const isoY = PP.ISO.y;
+            const fx = n.x;
+            const fy = n.y + isoY;
+            const fw = n.w;
+            const fh = n.h - isoY;
+            const doorInset = 14;
+            const bodyFill = silver ? 'url(#silverBody)' : 'url(#charcoalBody)';
+            const sideFill = fam === 'h2' ? '#94a3b8' : (silver ? '#64748b' : '#1e293b');
+            const topFill = silver ? 'url(#isoTopLite)' : 'url(#isoTopDark)';
+            const label = {
+                x1c: 'X1-Carbon', x1e: 'X1E', p1s: 'P1S', p1p: 'P1P',
+                p2s: 'P2S', x2d: 'X2D', h2d: 'H2D', h2s: 'H2S', h2c: 'H2C'
+            }[n.printerId] || '';
+            const doorW = fw - doorInset * 2;
+            const doorH = fh - 38;
+            const doorY = fy + 22;
+            return (
+                <g>
+                    <polygon
+                        points={`${fx + fw},${fy} ${fx + fw + isoX},${fy - isoY} ${fx + fw + isoX},${fy - isoY + fh} ${fx + fw},${fy + fh}`}
+                        fill={sideFill}
+                        stroke="#0f172a"
+                    />
+                    {sideGlass && (
+                        <polygon
+                            points={`${fx + fw + 6},${fy + 28} ${fx + fw + isoX - 6},${fy + 28 - isoY + 10} ${fx + fw + isoX - 6},${fy + fh - 36 - isoY + 10} ${fx + fw + 6},${fy + fh - 36}`}
+                            fill="url(#glassGrad)"
+                            stroke="#0f172a"
+                            strokeOpacity="0.4"
+                        />
+                    )}
+                    <polygon
+                        points={`${fx},${fy} ${fx + fw},${fy} ${fx + fw + isoX},${fy - isoY} ${fx + isoX},${fy - isoY}`}
+                        fill={topFill}
+                        stroke="#0f172a"
+                    />
+                    {fam === 'x1' && (
+                        <ellipse cx={fx + fw / 2 + isoX * 0.35} cy={fy - isoY * 0.45} rx="14" ry="5" fill="#111827" stroke="#f97316" strokeWidth="1.1" />
+                    )}
+                    <rect x={fx} y={fy} width={fw} height={fh} rx="5" fill={bodyFill} stroke="#0f172a" strokeWidth="2" />
+                    <rect x={fx} y={fy} width={fw} height="16" fill={silver ? '#111827' : '#020617'} />
+                    <text x={fx + fw - 8} y={fy + 11} textAnchor="end" fill={silver ? '#cbd5e1' : '#e2e8f0'} fontSize="7" fontFamily="ui-sans-serif, system-ui">{label}</text>
+
+                    <rect x={fx + 7} y={n.y + 4} width="32" height="20" rx="3" fill="#020617" stroke="#334155" />
+                    <rect x={fx + 10} y={n.y + 7} width="26" height="14" rx="2" fill="#0ea5e9" opacity="0.4" />
+                    {fam === 'p1' && <circle cx={fx + 46} cy={fy + 8} r="4" fill="#1e293b" stroke="#64748b" />}
+
+                    {u.under_armor && <rect x={fx + 4} y={fy + fh - 10} width={fw - 8} height="8" rx="2" fill="#334155" stroke="#22d3ee" />}
+
+                    {openFront ? (
+                        <rect x={fx + doorInset} y={doorY} width={doorW} height={doorH} rx="3" fill="#020617" stroke="#1e293b" />
+                    ) : (
+                        <rect x={fx + doorInset} y={doorY} width={doorW} height={doorH} rx="3" fill="url(#glassGrad)" stroke="#0f172a" />
+                    )}
+                    {!openFront && (
+                        <rect x={fx + fw - doorInset - 5} y={fy + fh * 0.48} width="13" height="6" rx="3" fill="#f8fafc" />
+                    )}
+
+                    <rect x={fx + doorInset + 8} y={doorY + 8} width={doorW - 16} height={u.frame_top ? 6 : 4} fill={u.frame_top ? '#fcd34d' : '#1e293b'} filter={u.frame_top ? 'url(#glow)' : ''} />
+                    <rect x={fx + fw - doorInset - 8} y={doorY + 16} width="5" height={doorH - 28} fill="#1e293b" />
+
+                    <rect x={fx + doorInset + 16} y={fy + fh - 42} width={doorW - 32} height="9" rx="2" fill="#1e293b" />
+                    <rect x={fx + doorInset + 16} y={fy + fh - 46} width={doorW - 32} height="5" rx="1" fill={u.buildplate ? '#3b82f6' : '#475569'} filter={u.buildplate ? 'url(#glow)' : ''} />
+                    {u.under_bed && (
+                        <rect x={fx + doorInset + 18} y={fy + fh - 36} width={doorW - 36} height="5" rx="2" fill="url(#rainbowGrad)" filter="url(#glow)" />
+                    )}
+
+                    <rect x={fx + doorInset + 10} y={doorY + 36} width={doorW - 20} height="5" fill="#475569" />
+                    <g transform={`translate(${fx + fw / 2 - (dual ? 30 : 22)}, ${doorY + 22})`}>
+                        <rect width={dual ? 60 : 44} height="48" rx="5" fill="#111827" stroke="#334155" />
+                        {dual && <rect x="4" y="8" width="18" height="22" rx="2" fill="#1e293b" stroke="#f97316" />}
+                        <rect x={dual ? 34 : 12} y="8" width="18" height="22" rx="2" fill="#1e293b" />
+                        <circle cx={dual ? 16 : 14} cy="17" r="5" fill={u.extruder ? '#fbbf24' : '#0f172a'} filter={u.extruder ? 'url(#glow)' : ''} />
+                        <circle cx={dual ? 44 : 30} cy="17" r="5" fill={u.extruder ? '#fbbf24' : '#0f172a'} filter={u.extruder ? 'url(#glow)' : ''} />
+                        {u.toolhead_front ? (
+                            <circle cx={dual ? 30 : 22} cy="34" r="8" fill="#111" stroke="#fff" strokeWidth="2" />
+                        ) : (
+                            <circle cx={dual ? 30 : 22} cy="34" r="6" fill="#020617" />
+                        )}
+                    </g>
+
+                    {u.chamber_back && (
+                        <rect x={fx + fw - 46} y={doorY + 20} width="20" height="36" rx="3" fill="#2dd4bf" opacity="0.75" filter="url(#glow)" />
+                    )}
+                    {u.usb_hub && <rect x={fx + fw - 16} y={fy + 88} width="10" height="28" rx="2" fill="#a855f7" filter="url(#glow)" />}
+                    {u.power && <rect x={fx + 6} y={fy + fh - 20} width="16" height="12" rx="2" fill="#22c55e" />}
+                    <rect x={fx + 6} y={fy + fh - 5} width={fw - 12} height="4" rx="1" fill="#020617" />
+                </g>
+            );
+        }
+
+        function BedSlingerPrinter({ n }) {
+            const u = n.upgrades || {};
+            const mini = n.family === 'a1mini';
+            const baseH = mini ? 34 : 40;
+            const baseY = n.y + n.h - baseH;
+            const pillarW = mini ? 30 : 24;
+            const leftX = n.x + 8;
+            const rightX = n.x + n.w - pillarW - 6;
+            const topY = n.y + 22;
+            const gantryY = n.y + n.h * 0.42;
+            const headX = mini ? n.x + n.w * 0.34 : n.x + n.w / 2 - 20;
+            const tubeToX = mini ? rightX + pillarW / 2 : rightX + 10;
+            return (
+                <g>
+                    <IsoExtrude x={n.x} y={baseY} w={n.w} h={baseH} top="#cbd5e1" side="#94a3b8" />
+                    <rect x={n.x} y={baseY} width={n.w} height={baseH} rx="6" fill="url(#lightFrame)" stroke="#94a3b8" strokeWidth="1.5" />
+                    <rect x={n.x + 6} y={baseY + 5} width={n.w - 14} height="9" rx="2" fill="#1e293b" />
+                    <rect x={n.x + 20} y={baseY - 12} width={n.w - (mini ? 68 : 50)} height="12" rx="2" fill={u.buildplate ? '#3b82f6' : '#334155'} filter={u.buildplate ? 'url(#glow)' : ''} />
+                    {u.under_bed && (
+                        <rect x={n.x + 24} y={baseY + 1} width={n.w - (mini ? 76 : 58)} height="5" rx="2" fill="url(#rainbowGrad)" filter="url(#glow)" />
+                    )}
+                    {u.chamber_back && (
+                        <rect x={n.x + 10} y={baseY + 16} width="28" height="16" rx="3" fill="#2dd4bf" opacity="0.8" filter="url(#glow)" />
+                    )}
+                    {u.usb_hub && <rect x={n.x + n.w - 52} y={baseY + 16} width="10" height="18" rx="2" fill="#a855f7" filter="url(#glow)" />}
+                    <rect x={n.x + n.w - 38} y={baseY + 10} width="26" height="18" rx="2" fill="#0f172a" stroke="#334155" />
+                    <rect x={n.x + n.w - 35} y={baseY + 13} width="20" height="12" rx="1" fill="#38bdf8" opacity="0.45" />
+
+                    {!mini && <rect x={leftX} y={topY} width={pillarW} height={baseY - topY} rx="3" fill="url(#lightFrame)" stroke="#94a3b8" />}
+                    <rect x={rightX} y={topY} width={pillarW} height={baseY - topY} rx="3" fill="url(#lightFrame)" stroke="#94a3b8" />
+                    {!mini && <rect x={leftX} y={topY} width={rightX + pillarW - leftX} height="11" rx="2" fill={u.frame_top ? '#fcd34d' : '#cbd5e1'} filter={u.frame_top ? 'url(#glow)' : ''} />}
+                    {mini && <rect x={n.x + 14} y={gantryY} width={rightX - n.x - 8} height="13" rx="2" fill={u.frame_top ? '#fcd34d' : '#cbd5e1'} stroke="#94a3b8" filter={u.frame_top ? 'url(#glow)' : ''} />}
+                    {!mini && <rect x={leftX + 4} y={gantryY} width={rightX - leftX + pillarW - 8} height="13" rx="2" fill="#cbd5e1" stroke="#94a3b8" />}
+
+                    <text x={rightX + 3} y={topY + 26} fill="#334155" fontSize="6" fontFamily="ui-sans-serif, system-ui">{mini ? 'A1 mini' : 'A1'}</text>
+
+                    <path
+                        d={`M ${headX + 20} ${gantryY - 2} Q ${(headX + tubeToX) / 2} ${n.y + 2} ${tubeToX} ${topY + 6}`}
+                        fill="none"
+                        stroke="#111827"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                    />
+
+                    <g transform={`translate(${headX}, ${gantryY - 24})`}>
+                        <rect width="40" height="40" rx="5" fill="#e2e8f0" stroke="#94a3b8" />
+                        <rect x="8" y="6" width="24" height="10" rx="1" fill="#cbd5e1" />
+                        <circle cx="20" cy="26" r={u.toolhead_front ? 8 : 7} fill={u.toolhead_front ? '#111' : '#f59e0b'} stroke={u.toolhead_front ? '#fff' : '#b45309'} strokeWidth="2" />
+                        {u.extruder && <circle cx="10" cy="10" r="3" fill="#fbbf24" />}
+                    </g>
+                    {u.power && <rect x={n.x + 8} y={baseY + 16} width="14" height="10" rx="2" fill="#22c55e" />}
+                </g>
+            );
+        }
+
+        function U1Printer({ n }) {
+            const u = n.upgrades || {};
+            const capH = n.popcapH || 0;
+            const isoX = PP.ISO.x;
+            const isoY = PP.ISO.y;
+            const bodyY = n.y + capH + isoY;
+            const bodyH = (n.bodyH || (n.h - capH)) - isoY;
+            const fx = n.x;
+            const dockY = bodyY + 18;
+            const heads = ['#facc15', '#f8fafc', '#ef4444', '#f59e0b'];
+            return (
+                <g>
+                    <circle cx={fx - 2} cy={bodyY + bodyH * 0.4} r="15" fill="none" stroke="#d97706" strokeWidth="7" />
+                    <circle cx={fx + n.w + isoX * 0.35} cy={bodyY + bodyH * 0.36} r="16" fill="none" stroke="#f8fafc" strokeWidth="7" />
+                    <circle cx={fx + n.w + isoX * 0.35} cy={bodyY + bodyH * 0.58} r="16" fill="none" stroke="#ef4444" strokeWidth="7" />
+
+                    <polygon
+                        points={`${fx + n.w},${bodyY} ${fx + n.w + isoX},${bodyY - isoY} ${fx + n.w + isoX},${bodyY - isoY + bodyH} ${fx + n.w},${bodyY + bodyH}`}
+                        fill="#e2e8f0"
+                        stroke="#cbd5e1"
+                    />
+                    <polygon
+                        points={`${fx},${bodyY} ${fx + n.w},${bodyY} ${fx + n.w + isoX},${bodyY - isoY} ${fx + isoX},${bodyY - isoY}`}
+                        fill="#27272a"
+                        stroke="#111827"
+                    />
+                    <polygon
+                        points={`${fx + 18},${bodyY} ${fx + n.w - 18},${bodyY} ${fx + n.w - 18 + isoX * 0.55},${bodyY - isoY * 0.7} ${fx + 18 + isoX * 0.55},${bodyY - isoY * 0.7}`}
+                        fill="#09090b"
+                    />
+
+                    <rect x={fx} y={bodyY} width={n.w} height={bodyH} rx="6" fill="url(#u1White)" stroke="#cbd5e1" strokeWidth="2" />
+                    <text x={fx + 12} y={bodyY + 20} fill="#64748b" fontSize="8" fontFamily="ui-sans-serif, system-ui">snapmaker</text>
+                    <rect x={fx + n.w - 30} y={bodyY + 8} width="18" height="26" rx="3" fill="#111827" stroke="#3f3f46" />
+                    <rect x={fx + n.w - 27} y={bodyY + 12} width="12" height="18" rx="1" fill="#22d3ee" opacity="0.5" />
+
+                    <rect x={fx + 16} y={bodyY + 42} width={n.w - 32} height={bodyH - 58} rx="4" fill="#09090b" stroke="#27272a" />
+                    <rect x={fx + 30} y={bodyY + bodyH - 44} width={n.w - 60} height="12" rx="2" fill={u.buildplate ? '#3b82f6' : '#52525b'} filter={u.buildplate ? 'url(#glow)' : ''} />
+                    <rect x={fx + 26} y={bodyY + 86} width={n.w - 52} height="6" fill="#3f3f46" />
+                    <g transform={`translate(${fx + n.w / 2 - 16}, ${bodyY + 72})`}>
+                        <rect width="32" height="36" rx="4" fill="#f8fafc" stroke="#f97316" strokeWidth="1.2" />
+                        <circle cx="16" cy="16" r="6" fill="#f59e0b" />
+                        <rect x="8" y="26" width="16" height="10" fill={u.toolhead_internal ? '#ef4444' : '#27272a'} />
+                    </g>
+                    {heads.map((color, i) => {
+                        const dx = fx + 32 + i * 36;
+                        return (
+                            <g key={i}>
+                                {!capH && (
+                                    <path
+                                        d={`M ${dx + 10} ${dockY + 2} C ${dx + 10} ${n.y + 8}, ${dx + 24} ${n.y + 8}, ${dx + 24} ${dockY + 2}`}
+                                        fill="none"
+                                        stroke="#111827"
+                                        strokeWidth="3"
+                                        strokeLinecap="round"
+                                    />
+                                )}
+                                <rect x={dx} y={dockY} width="24" height="28" rx="3" fill="#18181b" stroke="#3f3f46" />
+                                <rect x={dx + 5} y={dockY + 5} width="14" height="6" rx="1" fill={color} />
+                            </g>
+                        );
+                    })}
+                    {u.waste_bin && (
+                        <rect x={fx + 36} y={bodyY + bodyH - 20} width={n.w - 72} height="10" rx="2" fill="#a3e635" filter="url(#glow)" />
+                    )}
+
+                    {capH > 0 && (
+                        <g>
+                            <IsoExtrude
+                                x={fx}
+                                y={bodyY - capH}
+                                w={n.w}
+                                h={capH}
+                                top="rgba(186,230,253,0.45)"
+                                side="rgba(8,47,73,0.55)"
+                                stroke="#7dd3fc"
+                            />
+                            <rect x={fx} y={bodyY - capH} width={n.w} height={capH} rx="4" fill="url(#popcapGlass)" stroke="#7dd3fc" strokeWidth="1.6" />
+                            <rect x={fx + 16} y={bodyY - capH + 14} width={n.w - 32} height={capH - 28} rx="3" fill="#38bdf8" opacity="0.08" stroke="#7dd3fc" strokeDasharray="5 4" strokeOpacity="0.7" />
+                            <text x={fx + 22} y={bodyY - capH + capH / 2 + 3} fill="#7dd3fc" fontSize="8" fontFamily="ui-sans-serif, system-ui" opacity="0.9">magnetic hatch</text>
+                            {[0, 1, 2, 3].map((i) => (
+                                <rect
+                                    key={i}
+                                    x={fx + 22 + i * 28 + isoX * 0.35}
+                                    y={bodyY - capH - isoY + 6}
+                                    width="20"
+                                    height="6"
+                                    rx="1"
+                                    fill="#0f172a"
+                                    stroke="#7dd3fc"
+                                    strokeOpacity="0.55"
+                                />
+                            ))}
+                            <text x={fx + n.w + isoX - 8} y={bodyY - capH - isoY + 12} textAnchor="end" fill="#7dd3fc" fontSize="7" fontFamily="ui-monospace, monospace">POPCAP</text>
+                        </g>
+                    )}
+                </g>
+            );
+        }
+
+        function PrinterNode({ n }) {
+            if (n.family === 'a1' || n.family === 'a1mini') return <BedSlingerPrinter n={n} />;
+            if (n.family === 'u1') return <U1Printer n={n} />;
+            return <EnclosedPrinter n={n} />;
+        }
+
+        function SceneVisualizer({ scene }) {
+            const order = ['desk', 'station', 'stack', 'den', 'feed_rack', 'printer', 'perch', 'ams', 'touch'];
+            const sorted = [...scene.nodes].sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
+            return (
+                <svg viewBox={scene.viewBox} className="w-full h-full max-h-[62vh] object-contain drop-shadow-2xl">
+                    <SvgDefs />
+                    {sorted.map((n, i) => {
+                        const key = n.kind + '-' + i;
+                        if (n.kind === 'desk') return <DeskNode key={key} n={n} />;
+                        if (n.kind === 'station') return <StationNode key={key} n={n} />;
+                        if (n.kind === 'den') return <DenNode key={key} n={n} />;
+                        if (n.kind === 'stack') return <StackNode key={key} n={n} />;
+                        if (n.kind === 'perch') return <PerchNode key={key} n={n} />;
+                        if (n.kind === 'feed_rack') return <FeedRackNode key={key} n={n} />;
+                        if (n.kind === 'ams') return <AmsNode key={key} n={n} />;
+                        if (n.kind === 'touch') return <TouchNode key={key} n={n} />;
+                        if (n.kind === 'printer') return <PrinterNode key={key} n={n} />;
+                        return null;
+                    })}
+                </svg>
+            );
+        }
+
+        const LOC_LABELS = {
+            on_printer: 'On printer lid',
+            perch: 'On Panda Perch',
+            station_drawer: 'In Station drawers',
+            stack_tray: 'On Stack tray',
+            side: 'Beside printer'
+        };
+
+        const App = () => {
+            const [selectedPrinterId, setSelectedPrinterId] = useState(null);
+            const [selectedAccessories, setSelectedAccessories] = useState(new Set());
+            const [amsId, setAmsId] = useState('none');
+            const [amsQty, setAmsQty] = useState(1);
+            const [amsLocation, setAmsLocation] = useState('none');
+            const [showRefPhoto, setShowRefPhoto] = useState(false);
+
+            const printer = PP.CATALOG.printers.find((p) => p.id === selectedPrinterId);
+
+            const compatibleAccessories = useMemo(() => {
+                if (!selectedPrinterId) return [];
+                return PP.compatibleAccessories(selectedPrinterId);
+            }, [selectedPrinterId]);
+
+            const compatibleAms = useMemo(() => {
+                if (!selectedPrinterId) return [];
+                return PP.compatibleAms(selectedPrinterId);
+            }, [selectedPrinterId]);
+
+            const cfg = useMemo(() => PP.resolveConfig({
+                printerId: selectedPrinterId,
+                selectedIds: selectedAccessories,
+                amsId,
+                amsQty,
+                amsLocation
+            }), [selectedPrinterId, selectedAccessories, amsId, amsQty, amsLocation]);
+
+            const scene = useMemo(() => PP.buildScene(cfg), [cfg]);
+
+            const availableLocs = useMemo(() => {
+                if (!printer || !cfg.ams) return [];
+                return PP.availableAmsLocations(printer, cfg.ams, selectedAccessories);
+            }, [printer, cfg.ams, selectedAccessories]);
+
+            useEffect(() => {
+                if (cfg.amsLocation && cfg.amsLocation !== amsLocation) {
+                    setAmsLocation(cfg.amsLocation);
+                }
+            }, [cfg.amsLocation]);
+
+            const startPrinter = (id) => {
+                const p = PP.CATALOG.printers.find((x) => x.id === id);
+                setSelectedPrinterId(id);
+                setSelectedAccessories(new Set());
+                const def = p ? p.defaultAms : 'none';
+                setAmsId(def);
+                setAmsQty(def === 'none' ? 0 : 1);
+                const ams = PP.CATALOG.amsUnits.find((a) => a.id === def);
+                setAmsLocation(PP.defaultAmsLocation(p, ams, new Set()));
+            };
+
+            const toggleAccessory = (id) => {
+                const acc = PP.CATALOG.accessories.find((a) => a.id === id);
+                setSelectedAccessories((prev) => {
+                    const next = acc && acc.category === 'storage' ? PP.applyFurnitureToggle(prev, id) : (() => {
+                        const n = new Set(prev);
+                        if (n.has(id)) n.delete(id);
+                        else n.add(id);
+                        return n;
+                    })();
+                    if (next.has('panda_stack') && (amsId === 'ams_lite' || amsId === 'none')) {
+                        setAmsId('ams_2_pro');
+                        setAmsQty(1);
+                        setAmsLocation('stack_tray');
+                    }
+                    return next;
+                });
+            };
+
+            const furnitureIds = compatibleAccessories.filter((a) => a.category === 'storage').map((a) => a.id);
+            const upgradeIds = compatibleAccessories.filter((a) => a.category === 'upgrade').map((a) => a.id);
+
+            const toggleGroup = (ids) => {
+                const allOn = ids.every((id) => selectedAccessories.has(id));
+                setSelectedAccessories((prev) => {
+                    let next = new Set(prev);
+                    if (allOn) {
+                        ids.forEach((id) => next.delete(id));
+                        return next;
+                    }
+                    ids.forEach((id) => {
+                        const acc = PP.CATALOG.accessories.find((a) => a.id === id);
+                        if (acc && acc.category === 'storage') next = PP.applyFurnitureToggle(next, id);
+                        else next.add(id);
+                    });
+                    return next;
+                });
+            };
+
+            const amsLine = cfg.ams && (cfg.ams.id === 'ace' || cfg.ams.id === 'vivid') ? {
+                id: cfg.ams.id,
+                name: cfg.ams.name,
+                qty: cfg.amsQty,
+                kind: 'panda'
+            } : (cfg.ams && cfg.ams.id !== 'none' ? {
+                id: cfg.ams.id,
+                name: cfg.ams.name,
+                qty: cfg.amsQty,
+                kind: 'scene'
+            } : null);
+
+            const bomAccessories = compatibleAccessories.filter((a) => selectedAccessories.has(a.id));
+            const biquCartUrl = PP.buildBiquCartUrl(bomAccessories.map((a) => a.id), printer);
+            const biquCartCount = bomAccessories.filter((a) => PP.resolveVariantId(a.id, printer)).length;
+
+            const furnitureSelected = bomAccessories.find((a) => a.group === 'furniture');
+
+            const groupedUpgrades = useMemo(() => {
+                const groups = {};
+                compatibleAccessories.forEach((a) => {
+                    const g = a.group || a.category;
+                    if (!groups[g]) groups[g] = [];
+                    groups[g].push(a);
+                });
+                return groups;
+            }, [compatibleAccessories]);
+
+            const groupOrder = ['furniture', 'on-printer', 'power', 'plates', 'snapmaker'];
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    <header className="border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedPrinterId(null)}>
+                                <img src="img/logo.png" alt="" className="w-9 h-9 rounded-lg shrink-0" />
+                                <div>
+                                    <h1 className="text-xl font-black tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
+                                        PandaPlanner
+                                    </h1>
+                                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Bambu + BigTreeTech Panda Verse</p>
+                                </div>
+                            </div>
+                            <div className="text-sm font-medium text-slate-400 hidden sm:block">
+                                Ultimate BTT workspace planner
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full animate-fade-in">
+                        {!selectedPrinterId ? (
+                            <div className="text-center py-6 space-y-3">
+                                <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Plan Your PandaVerse</h2>
+                                <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">Pick a Bambu Lab or Snapmaker printer, then stack Station, Den, Stack, Perch, and AMS the way they actually sit.</p>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-6 text-left">
+                                    {PP.CATALOG.printers.map((p) => (
+                                        <button
+                                            key={p.id}
+                                            onClick={() => startPrinter(p.id)}
+                                            className="group rounded-xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-800/80 hover:shadow-[0_0_24px_-10px_rgba(16,185,129,0.3)] transition-all duration-300 overflow-hidden text-left"
+                                        >
+                                            <div className="h-24 sm:h-28 flex items-center justify-center overflow-hidden">
+                                                <Photo src={p.photo} alt={p.name} className="printer-cutout h-full w-full object-contain p-1.5" />
+                                            </div>
+                                            <div className="px-3 py-2.5">
+                                                <h3 className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors leading-snug">{p.name}</h3>
+                                                <p className="text-slate-500 text-[11px] mt-0.5 truncate">{p.imgLabel}</p>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
+                                <div className="col-span-1 lg:col-span-4 flex flex-col space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <button onClick={() => setSelectedPrinterId(null)} className="text-sm font-semibold text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+                                            <Icons.ChevronLeft className="w-4 h-4"/> Back
+                                        </button>
+                                        <button onClick={() => toggleGroup(upgradeIds)} className="text-xs font-bold text-emerald-400 hover:text-emerald-300 uppercase tracking-wider px-3 py-1 rounded bg-emerald-500/10">
+                                            {upgradeIds.length && upgradeIds.every((id) => selectedAccessories.has(id)) ? 'Clear upgrades' : 'Select upgrades'}
+                                        </button>
+                                    </div>
+
+                                    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-3">
+                                        <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">AMS / multi-material</h3>
+                                        <select
+                                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"
+                                            value={amsId}
+                                            onChange={(e) => {
+                                                const next = e.target.value;
+                                                setAmsId(next);
+                                                const unit = PP.CATALOG.amsUnits.find((a) => a.id === next);
+                                                setAmsQty(next === 'none' ? 0 : 1);
+                                                setAmsLocation(PP.defaultAmsLocation(printer, unit, selectedAccessories));
+                                            }}
+                                        >
+                                            {compatibleAms.map((a) => (
+                                                <option key={a.id} value={a.id}>{a.name}</option>
+                                            ))}
+                                        </select>
+                                        {cfg.ams && cfg.ams.id !== 'none' && (
+                                            <div className="flex items-center gap-3">
+                                                <label className="text-xs text-slate-400">Qty</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    max={cfg.ams.maxQty}
+                                                    value={cfg.amsQty}
+                                                    onChange={(e) => setAmsQty(Number(e.target.value))}
+                                                    className="w-16 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm"
+                                                />
+                                                {availableLocs.length > 0 && (
+                                                    <select
+                                                        className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white"
+                                                        value={cfg.amsLocation}
+                                                        onChange={(e) => setAmsLocation(e.target.value)}
+                                                    >
+                                                        {availableLocs.map((loc) => (
+                                                            <option key={loc} value={loc}>{LOC_LABELS[loc] || loc}</option>
+                                                        ))}
+                                                    </select>
+                                                )}
+                                            </div>
+                                        )}
+                                        <p className="text-xs text-slate-500 leading-relaxed">{cfg.ams && cfg.ams.desc}</p>
+                                    </div>
+
+                                    <div className="flex flex-col gap-6 lg:max-h-[calc(100vh-22rem)] overflow-y-auto pr-2 custom-scrollbar">
+                                        {groupOrder.map((group) => {
+                                            const items = groupedUpgrades[group];
+                                            if (!items || !items.length) return null;
+                                            const accent = group === 'furniture' ? 'indigo' : 'emerald';
+                                            return (
+                                                <div key={group} className="space-y-3">
+                                                    <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider sticky top-0 bg-slate-950/80 backdrop-blur py-2 z-10">{PP.GROUP_LABELS[group] || group}</h3>
+                                                    {items.map((acc) => {
+                                                        const isSelected = selectedAccessories.has(acc.id);
+                                                        const disabledReason = PP.isAccessoryDisabled(acc, printer, selectedAccessories, amsId);
+                                                        const locked = Boolean(disabledReason) && !isSelected;
+                                                        return (
+                                                            <label key={acc.id} className={`flex items-start gap-3 p-3 rounded-xl border transition-all duration-300 ${locked ? 'opacity-40 cursor-not-allowed bg-slate-900/30 border-slate-800' : 'cursor-pointer'} ${isSelected ? (accent === 'indigo' ? 'bg-indigo-900/10 border-indigo-500/50' : 'bg-emerald-900/10 border-emerald-500/50') : 'bg-slate-900/50 border-slate-800 hover:border-slate-600'}`}>
+                                                                <input type="checkbox" className="hidden" checked={isSelected} disabled={locked} onChange={() => !locked && toggleAccessory(acc.id)} />
+                                                                <Photo src={acc.photo} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                                                                <div className="pt-1">
+                                                                    <div className={`w-5 h-5 rounded flex items-center justify-center ${isSelected ? (accent === 'indigo' ? 'bg-indigo-500 text-slate-900' : 'bg-emerald-500 text-slate-900') : 'border border-slate-600 bg-slate-800'}`}>
+                                                                        {isSelected && <Icons.Check className="w-3 h-3" />}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <h4 className={`font-semibold text-sm ${isSelected ? (accent === 'indigo' ? 'text-indigo-300' : 'text-emerald-300') : 'text-white'}`}>{acc.name}</h4>
+                                                                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">{acc.desc}</p>
+                                                                    {locked && <p className="text-[11px] text-amber-400 mt-1">{disabledReason}</p>}
+                                                                </div>
+                                                            </label>
+                                                        );
+                                                    })}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                <div className="col-span-1 lg:col-span-5 relative">
+                                    <div className="sticky top-24 bg-slate-900/50 rounded-2xl border border-slate-800 flex flex-col p-4 overflow-hidden h-[52vh] lg:h-[calc(100vh-8rem)]">
+                                        <div className="absolute inset-0 blueprint-grid opacity-50"></div>
+                                        <div className="relative z-10 flex items-start justify-between gap-3 mb-2">
+                                            <div className="bg-slate-800/80 backdrop-blur border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-300 flex items-center gap-2">
+                                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                {printer.name}
+                                            </div>
+                                            <label className="text-[11px] text-slate-400 flex items-center gap-2 bg-slate-800/70 border border-slate-700 rounded-lg px-2 py-1 cursor-pointer">
+                                                <input type="checkbox" checked={showRefPhoto} onChange={(e) => setShowRefPhoto(e.target.checked)} />
+                                                Reference photo
+                                            </label>
+                                        </div>
+                                        <p className="relative z-10 text-[11px] text-slate-400 mb-2 leading-snug">{cfg.caption}</p>
+                                        {cfg.warnings.map((w, i) => (
+                                            <p key={i} className="relative z-10 text-[11px] text-amber-400 mb-1">{w}</p>
+                                        ))}
+                                        <div className="relative z-10 flex-1 flex items-center justify-center pointer-events-none min-h-0">
+                                            <SceneVisualizer scene={scene} />
+                                        </div>
+                                        {showRefPhoto && furnitureSelected && furnitureSelected.photo && (
+                                            <div className="relative z-10 mt-2 rounded-xl overflow-hidden border border-slate-700 h-28">
+                                                <Photo src={furnitureSelected.photo} alt={furnitureSelected.name} className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="col-span-1 lg:col-span-3">
+                                    <div className="sticky top-24 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl flex flex-col max-h-[calc(100vh-8rem)]">
+                                        <h3 className="text-xl font-bold text-white mb-2">Your configuration</h3>
+                                        <p className="text-[11px] text-slate-500 font-mono mb-4">{cfg.footprint}</p>
+
+                                        {bomAccessories.length === 0 && !amsLine ? (
+                                            <div className="text-slate-500 text-center py-12 flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-800 rounded-xl">
+                                                <Icons.PandaFace className="w-12 h-12 mb-4 opacity-20 grayscale" />
+                                                <p className="text-sm">Add Panda Verse furniture or upgrades to build a BIQU cart. Bambu AMS stays in the scene only.</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="space-y-3 mb-6 overflow-y-auto flex-1 pr-2 custom-scrollbar">
+                                                    {amsLine && (
+                                                        <div className="flex justify-between items-start text-sm">
+                                                            <span className="text-slate-300">{amsLine.qty > 1 ? `${amsLine.qty}× ` : ''}{amsLine.name}</span>
+                                                            <span className="text-[10px] uppercase tracking-wide text-slate-500 shrink-0">{amsLine.kind === 'panda' ? 'Stack tray' : 'In scene'}</span>
+                                                        </div>
+                                                    )}
+                                                    {bomAccessories.map((acc) => (
+                                                        <div key={acc.id} className="flex justify-between items-start text-sm group">
+                                                            <a href={PP.productUrl(acc.id)} target="_blank" rel="noopener noreferrer" className="text-slate-300 hover:text-emerald-400 transition-colors flex items-center gap-1">
+                                                                {acc.name} <Icons.ExternalLink className="opacity-0 group-hover:opacity-100 w-3 h-3" />
+                                                            </a>
+                                                            <span className="text-[10px] uppercase tracking-wide text-slate-500 shrink-0">{PP.resolveVariantId(acc.id, printer) ? 'BIQU cart' : 'Store page'}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <div className="mt-auto space-y-2">
+                                                    <div className="border-t border-slate-700 pt-4 mb-2">
+                                                        <p className="text-xs text-slate-500 leading-relaxed">
+                                                            {biquCartUrl
+                                                                ? `${biquCartCount} Panda item${biquCartCount === 1 ? '' : 's'} will be added to your BIQU cart (default China warehouse SKU).`
+                                                                : 'Select Panda Verse furniture or upgrades to enable Add to Cart.'}
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        disabled={!biquCartUrl}
+                                                        onClick={() => biquCartUrl && window.open(biquCartUrl, '_blank')}
+                                                        className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-700 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed text-slate-950 font-bold py-3 px-4 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2"
+                                                    >
+                                                        Add to BIQU Cart <Icons.ExternalLink className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+                    <footer className="border-t border-slate-800/80 mt-auto">
+                        <div className="max-w-7xl mx-auto px-4 py-4 text-center text-[11px] text-slate-500 leading-relaxed">
+                            This site uses affiliate links. Purchases through BIQU / Awin links may earn a commission at no extra cost to you.
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
