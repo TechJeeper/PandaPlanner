@@ -1,40 +1,60 @@
 (function (global) {
     const PP = global.PP || (global.PP = {});
 
-    const ISO = { x: 32, y: 20 };
+    const ISO = { x: 28, y: 18 };
     PP.ISO = ISO;
 
+    // Official product sizes in mm. One scale so Station (761) is taller than an X1 (457).
+    const SCALE = 0.52;
+    function px(mm) {
+        return Math.round(mm * SCALE);
+    }
+
+    const MM = {
+        station: { w: 490, d: 510, h: 761, caster: 52, drawer: 60 },
+        den_air: { w: 456, d: 388, h: 191 },
+        den_h2: { w: 495, d: 595, h: 185 },
+        stack: { w: 420, d: 340, h: 360, tray: 250, shelf: 16, post: 18 },
+        perch: { w: 396, d: 360, h: 136 },
+        perch_h2: { w: 754, d: 460, h: 145 },
+        feed_rack: { w: 635, d: 330, h: 1320 },
+        popcap: { w: 421, d: 506, h: 315 },
+        touch: { w: 140, d: 22, h: 88 },
+        ams: { w: 372, d: 280, h: 226 },
+        ams_2_pro: { w: 372, d: 280, h: 226 },
+        ams_lite: { w: 208, d: 397, h: 342 },
+        ams_ht: { w: 114, d: 280, h: 245 },
+        ace: { w: 360, d: 260, h: 190 },
+        vivid: { w: 360, d: 260, h: 190 }
+    };
+
     const SIZES = {
-        station: { w: 340, h: 168 },
-        den_air: { w: 286, h: 74 },
-        den_h2: { w: 318, h: 82 },
-        stack: { w: 312, h: 292, trayH: 80, post: 18, shelf: 14 },
-        perch: { w: 236, h: 34 },
-        feed_rack: { w: 176, h: 430 },
-        printer: {
-            x1: { w: 228, h: 304, isoX: ISO.x, isoY: ISO.y },
-            p1: { w: 226, h: 298, isoX: ISO.x, isoY: ISO.y },
-            p2: { w: 230, h: 312, isoX: ISO.x, isoY: ISO.y },
-            x2: { w: 230, h: 312, isoX: ISO.x, isoY: ISO.y },
-            h2: { w: 262, h: 386, isoX: ISO.x, isoY: ISO.y },
-            a1: { w: 248, h: 286, isoX: ISO.x, isoY: ISO.y },
-            a1mini: { w: 188, h: 252, isoX: ISO.x, isoY: ISO.y },
-            u1: { w: 248, h: 318, isoX: ISO.x, isoY: ISO.y }
-        },
+        station: { w: px(MM.station.w), h: px(MM.station.h - MM.station.caster), wheelH: px(MM.station.caster), drawerH: px(MM.station.drawer) },
+        den_air: { w: px(MM.den_air.w), h: px(MM.den_air.h) },
+        den_h2: { w: px(MM.den_h2.w), h: px(MM.den_h2.h) },
+        stack: { w: px(MM.stack.w), h: px(MM.stack.h), trayH: px(MM.stack.tray), post: px(MM.stack.post), shelf: px(MM.stack.shelf) },
+        perch: { w: px(MM.perch.w), h: px(MM.perch.h) },
+        perch_h2: { w: px(MM.perch_h2.w), h: px(MM.perch_h2.h) },
+        feed_rack: { w: px(MM.feed_rack.w), h: px(MM.feed_rack.h) },
+        popcapH: px(MM.popcap.h),
+        touch: { w: px(MM.touch.w), h: px(MM.touch.h) },
         ams: {
-            ams: { w: 208, h: 46 },
-            ams_2_pro: { w: 208, h: 50 },
-            ams_lite: { w: 86, h: 116 },
-            ams_ht: { w: 68, h: 88 },
-            ace: { w: 176, h: 52 },
-            vivid: { w: 176, h: 52 }
+            ams: { w: px(MM.ams.w), h: px(MM.ams.h) },
+            ams_2_pro: { w: px(MM.ams_2_pro.w), h: px(MM.ams_2_pro.h) },
+            ams_lite: { w: px(MM.ams_lite.w), h: px(MM.ams_lite.h) },
+            ams_ht: { w: px(MM.ams_ht.w), h: px(MM.ams_ht.h) },
+            ace: { w: px(MM.ace.w), h: px(MM.ace.h) },
+            vivid: { w: px(MM.vivid.w), h: px(MM.vivid.h) }
         }
     };
 
+    PP.SCALE = SCALE;
+    PP.MM = MM;
     PP.SIZES = SIZES;
 
-    function printerSize(family) {
-        return SIZES.printer[family] || SIZES.printer.p1;
+    function printerSize(printer) {
+        const fp = (printer && printer.footprint) || { w: 389, d: 389, h: 458 };
+        return { w: px(fp.w), h: px(fp.h), isoX: ISO.x, isoY: ISO.y };
     }
 
     function amsSize(id) {
@@ -50,7 +70,7 @@
         const printer = cfg.printer;
         const selected = cfg.selected;
         const family = printer.family;
-        const pSize = printerSize(family);
+        const pSize = printerSize(printer);
         const hasStation = selected.has('panda_station') || selected.has('panda_station_naked');
         const stationNaked = selected.has('panda_station_naked');
         const hasDen = selected.has('panda_den_air') || selected.has('panda_den_h2');
@@ -63,13 +83,17 @@
             if (selected.has(a.id) && a.slot) upgrades[a.slot] = true;
         });
 
-        const DESK_Y = 640;
-        const centerX = 270;
+        const DESK_Y = 980;
+        const CASTER_H = SIZES.station.wheelH;
+        const floorY = hasStation ? DESK_Y + CASTER_H : DESK_Y;
+        const centerX = 320;
         let y = DESK_Y;
         let supportLeft = centerX - pSize.w / 2;
         let supportW = pSize.w;
 
-        nodes.push({ kind: 'desk', x: 20, y: DESK_Y, w: 520, h: 16 });
+        if (!hasStation) {
+            nodes.push({ kind: 'desk', x: 40, y: DESK_Y, w: 600, h: 16 });
+        }
 
         if (hasStation) {
             const st = SIZES.station;
@@ -78,6 +102,8 @@
             nodes.push({
                 kind: 'station',
                 x, y, w: st.w, h: st.h,
+                wheelH: CASTER_H,
+                drawerH: SIZES.station.drawerH,
                 variant: stationNaked ? 'naked' : 'enclosed',
                 showAms: cfg.amsLocation === 'station_drawer' && cfg.ams.id !== 'none',
                 amsId: cfg.ams.id,
@@ -98,7 +124,7 @@
 
         let printerX = centerX - pSize.w / 2;
         let printerY;
-        const popcapH = family === 'u1' && selected.has('popcap') ? 92 : 0;
+        const popcapH = family === 'u1' && selected.has('popcap') ? SIZES.popcapH : 0;
 
         if (hasStack) {
             const st = SIZES.stack;
@@ -121,21 +147,22 @@
                 const aSize = amsSize(cfg.ams.id);
                 const qty = Math.min(cfg.amsQty, 2);
                 const gap = 10;
-                const totalW = qty * aSize.w + (qty - 1) * gap;
+                const aw = Math.min(aSize.w, (st.w - 16 - gap * (qty - 1)) / qty);
+                const totalW = qty * aw + (qty - 1) * gap;
                 let ax = stackX + (st.w - totalW) / 2;
-                const ay = stackBottom - st.trayH - 8 + (st.trayH - aSize.h) / 2;
+                const ay = stackBottom - st.trayH - 8 + Math.max(4, (st.trayH - aSize.h) / 2);
                 for (let i = 0; i < qty; i++) {
                     nodes.push({
                         kind: 'ams',
                         x: ax,
                         y: ay,
-                        w: aSize.w,
+                        w: aw,
                         h: aSize.h,
                         variant: cfg.ams.id,
                         guard: upgrades.ams_guard,
                         index: i
                     });
-                    ax += aSize.w + gap;
+                    ax += aw + gap;
                 }
             }
 
@@ -165,7 +192,7 @@
         nodes.push(printerNode);
 
         if (hasPerch && cfg.amsLocation !== 'stack_tray') {
-            const perch = SIZES.perch;
+            const perch = family === 'h2' ? SIZES.perch_h2 : SIZES.perch;
             const px = printerX + (pSize.w - perch.w) / 2;
             const py = printerY - perch.h - 8;
             nodes.push({ kind: 'perch', x: px, y: py, w: perch.w, h: perch.h, variant: family === 'h2' ? 'h2' : 'x1' });
@@ -235,7 +262,7 @@
             nodes.push({
                 kind: 'feed_rack',
                 x: rightEdge + 110,
-                y: DESK_Y - fr.h,
+                y: floorY - fr.h,
                 w: fr.w,
                 h: fr.h
             });
@@ -246,8 +273,8 @@
                 kind: 'touch',
                 x: printerX - 70,
                 y: printerY + pSize.h * 0.42,
-                w: 54,
-                h: 38
+                w: SIZES.touch.w,
+                h: SIZES.touch.h
             });
         }
 
@@ -256,7 +283,7 @@
             minX = Math.min(minX, n.x - 24);
             minY = Math.min(minY, n.y - ISO.y - 20);
             maxX = Math.max(maxX, n.x + n.w + ISO.x + 24);
-            maxY = Math.max(maxY, n.y + n.h + 20);
+            maxY = Math.max(maxY, n.y + n.h + (n.wheelH || 0) + 20);
         });
         const pad = 16;
         const viewBox = [minX - pad, minY - pad, (maxX - minX) + pad * 2, (maxY - minY) + pad * 2].join(' ');

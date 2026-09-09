@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 .playwright-mcp/
 predeploy-*.png
+tools/photogrammetry/colmap/
+tools/photogrammetry/input/
+tools/photogrammetry/work/

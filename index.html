@@ -172,6 +172,51 @@
                         <stop offset="0%" stopColor="#0f172a" />
                         <stop offset="100%" stopColor="#334155" />
                     </linearGradient>
+                    <linearGradient id="matteBlack" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#2a2a2e" />
+                        <stop offset="55%" stopColor="#161618" />
+                        <stop offset="100%" stopColor="#0b0b0d" />
+                    </linearGradient>
+                    <linearGradient id="h2Body" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#e7e5e4" />
+                        <stop offset="40%" stopColor="#d6d3d1" />
+                        <stop offset="100%" stopColor="#a8a29e" />
+                    </linearGradient>
+                    <linearGradient id="a1White" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f8fafc" />
+                        <stop offset="50%" stopColor="#e2e8f0" />
+                        <stop offset="100%" stopColor="#cbd5e1" />
+                    </linearGradient>
+                    <linearGradient id="goldPlate" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#fde68a" />
+                        <stop offset="55%" stopColor="#f59e0b" />
+                        <stop offset="100%" stopColor="#d97706" />
+                    </linearGradient>
+                    <linearGradient id="amsLid" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f8fafc" stopOpacity="0.55" />
+                        <stop offset="40%" stopColor="#94a3b8" stopOpacity="0.22" />
+                        <stop offset="100%" stopColor="#1e293b" stopOpacity="0.35" />
+                    </linearGradient>
+                    <linearGradient id="perchRed" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f87171" />
+                        <stop offset="100%" stopColor="#b91c1c" />
+                    </linearGradient>
+                    <linearGradient id="doorHandle" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#f8fafc" />
+                        <stop offset="100%" stopColor="#cbd5e1" />
+                    </linearGradient>
+                    <pattern id="hexCut" width="12" height="10.4" patternUnits="userSpaceOnUse">
+                        <rect width="12" height="10.4" fill="#141418" />
+                        <path d="M6 1 L10.2 3.3 L10.2 7.1 L6 9.4 L1.8 7.1 L1.8 3.3 Z" fill="#0b0b0e" stroke="#3f3f46" strokeWidth="0.55" />
+                    </pattern>
+                    <pattern id="hexCutLite" width="12" height="10.4" patternUnits="userSpaceOnUse">
+                        <rect width="12" height="10.4" fill="#1c1917" />
+                        <path d="M6 1 L10.2 3.3 L10.2 7.1 L6 9.4 L1.8 7.1 L1.8 3.3 Z" fill="#0c0a09" stroke="#44403c" strokeWidth="0.55" />
+                    </pattern>
+                    <pattern id="peiTexture" width="8" height="8" patternUnits="userSpaceOnUse">
+                        <rect width="8" height="8" fill="#d97706" />
+                        <path d="M0 8 L8 0" stroke="#fbbf24" strokeOpacity="0.25" strokeWidth="0.6" />
+                    </pattern>
                 </defs>
             );
         }
@@ -195,6 +240,109 @@
             );
         }
 
+        function PullHandle({ x, y, w = 38, h = 6 }) {
+            return (
+                <g>
+                    <rect x={x} y={y} width={w} height={h} rx="1.4" fill="#09090b" />
+                    <rect x={x + 1.5} y={y + 1} width={w - 3} height={h - 3.2} rx="1" fill="#3f3f46" />
+                </g>
+            );
+        }
+
+        function Caster({ cx, cy }) {
+            return (
+                <g>
+                    <ellipse cx={cx} cy={cy + 2} rx="9" ry="2.2" fill="#020617" opacity="0.28" />
+                    <rect x={cx - 5} y={cy - 16} width="10" height="8" rx="1.4" fill="#e7e5e4" stroke="#a8a29e" />
+                    <rect x={cx - 2.2} y={cy - 18} width="4.4" height="4" rx="0.8" fill="#d6d3d1" />
+                    <ellipse cx={cx - 3.4} cy={cy - 5} rx="3.6" ry="5.4" fill="#292524" stroke="#78716c" />
+                    <ellipse cx={cx + 3.4} cy={cy - 5} rx="3.6" ry="5.4" fill="#1c1917" stroke="#78716c" />
+                    <circle cx={cx - 3.4} cy={cy - 5} r="1.15" fill="#d6d3d1" />
+                    <circle cx={cx + 3.4} cy={cy - 5} r="1.15" fill="#d6d3d1" />
+                </g>
+            );
+        }
+
+        function BrandLine({ x, y, title, sub }) {
+            return (
+                <g>
+                    <text x={x} y={y} fill="#f8fafc" fontSize="8" fontFamily="ui-sans-serif, system-ui" fontWeight="700">{title}</text>
+                    {sub && <text x={x} y={y + 9} fill="#a1a1aa" fontSize="5.5" fontFamily="ui-sans-serif, system-ui">{sub}</text>}
+                </g>
+            );
+        }
+
+        function BiquMark({ x, y }) {
+            return (
+                <g transform={`translate(${x},${y})`} opacity="0.85">
+                    <path d="M0 0 H10 V6 H4 V10 H0 Z M12 0 H16 V16 H6 V12 H12 Z" fill="#f8fafc" />
+                    <text x="0" y="22" fill="#e4e4e7" fontSize="6" fontFamily="ui-sans-serif, system-ui" fontWeight="700">BIQU</text>
+                </g>
+            );
+        }
+
+        function PrinterScreen({ x, y, w = 30, h = 18, glow = '#38bdf8' }) {
+            return (
+                <g>
+                    <rect x={x} y={y} width={w} height={h} rx="2.5" fill="#09090b" stroke="#3f3f46" />
+                    <rect x={x + 2} y={y + 2} width={w - 4} height={h - 4} rx="1.4" fill="#082f49" />
+                    <rect x={x + 3} y={y + 4} width={w - 10} height="3" rx="0.6" fill={glow} opacity="0.55" />
+                    <rect x={x + 3} y={y + 9} width={w - 14} height="2" rx="0.5" fill={glow} opacity="0.28" />
+                </g>
+            );
+        }
+
+        function KnomiFace({ cx, cy, r = 7 }) {
+            return (
+                <g transform={`translate(${cx},${cy})`}>
+                    <circle className="knomi-halo" r={r + 1.4} />
+                    <circle r={r} fill="#111111" stroke="#f8fafc" strokeWidth="1.6" />
+                    <g className="knomi-eyes">
+                        <ellipse cx="-2.15" cy="-1.05" rx="1.15" ry="1.3" fill="#f8fafc" />
+                        <ellipse cx="2.15" cy="-1.05" rx="1.15" ry="1.3" fill="#f8fafc" />
+                    </g>
+                    <path
+                        className="knomi-smile"
+                        d="M -2.5 2.05 Q 0 4.15 2.5 2.05"
+                        strokeWidth="1.05"
+                    >
+                        <animate
+                            attributeName="d"
+                            dur="2.1s"
+                            repeatCount="indefinite"
+                            values="M -2.5 2.05 Q 0 4.15 2.5 2.05; M -2.75 1.55 Q 0 5.05 2.75 1.55; M -2.5 2.05 Q 0 4.15 2.5 2.05"
+                        />
+                    </path>
+                </g>
+            );
+        }
+
+        function StatusBar({ x, y, w, h = 5 }) {
+            const count = Math.max(8, Math.round(w / 7));
+            const ledW = (w - 2) / count;
+            return (
+                <g>
+                    <rect x={x} y={y} width={w} height={h} rx="1.6" fill="#111111" />
+                    {Array.from({ length: count }).map((_, i) => (
+                        <rect
+                            key={i}
+                            className="led-status"
+                            x={x + 1.1 + i * ledW}
+                            y={y + 0.85}
+                            width={Math.max(ledW - 0.7, 1.4)}
+                            height={h - 1.7}
+                            rx="0.7"
+                            style={{ animationDelay: `${i * 0.11}s` }}
+                        />
+                    ))}
+                </g>
+            );
+        }
+
+        function LuxBar({ x, y, w, h = 5 }) {
+            return <rect className="lux-bar" x={x} y={y} width={w} height={h} rx="1.4" filter="url(#glow)" />;
+        }
+
         function DeskNode({ n }) {
             return (
                 <g>
@@ -207,103 +355,146 @@
 
         function StationNode({ n }) {
             const naked = n.variant === 'naked';
-            const toolH = 18;
-            const drawerH = (n.h - toolH - 28) / 2;
+            const wheelH = n.wheelH || 16;
+            const bodyH = n.h;
+            const drawerH = n.drawerH || Math.round(bodyH * 0.085);
+            const trayGap = (bodyH - drawerH - 36) / 2;
+            const floorY = n.y + bodyH + wheelH;
             return (
                 <g>
-                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#64748b" side="#0f172a" />
-                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="6" fill={naked ? '#1e293b' : '#111827'} stroke="#0f172a" strokeWidth="2" />
-                    {naked && (
+                    <ellipse cx={n.x + n.w / 2} cy={floorY + 3} rx={n.w * 0.46} ry="7" fill="#0ea5e9" opacity="0.2" filter="url(#glow)" />
+                    <Caster cx={n.x + 24} cy={floorY} />
+                    <Caster cx={n.x + n.w - 24} cy={floorY} />
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={bodyH} top="#3f3f46" side="#09090b" />
+                    <BiquMark x={n.x + n.w + 8} y={n.y + 18} />
+                    {naked ? (
                         <g>
-                            <rect x={n.x + 8} y={n.y + 8} width="8" height={n.h - 16} fill="#334155" />
-                            <rect x={n.x + n.w - 16} y={n.y + 8} width="8" height={n.h - 16} fill="#334155" />
+                            {[0, n.w - 12].map((dx, i) => (
+                                <rect key={i} x={n.x + dx} y={n.y} width="12" height={bodyH} rx="3" fill="url(#matteBlack)" stroke="#09090b" />
+                            ))}
+                            <rect x={n.x} y={n.y} width={n.w} height={drawerH} rx="3" fill="url(#matteBlack)" stroke="#18181b" />
+                            <BrandLine x={n.x + 10} y={n.y + 12} title="Panda Station" sub="For makers, by makers." />
+                            <PullHandle x={n.x + n.w / 2 - 22} y={n.y + 16} w="44" />
+                            {[0, 1].map((i) => {
+                                const y = n.y + drawerH + 8 + i * (trayGap + 4);
+                                return (
+                                    <g key={i}>
+                                        <rect x={n.x + 14} y={y + 8} width="6" height={trayGap - 10} rx="1" fill="#27272a" />
+                                        <rect x={n.x + n.w - 20} y={y + 8} width="6" height={trayGap - 10} rx="1" fill="#27272a" />
+                                        <rect x={n.x + 10} y={y} width={n.w - 20} height={trayGap} rx="2" fill="#18181b" stroke="#3f3f46" />
+                                        <rect x={n.x + 14} y={y + 3} width={n.w - 28} height={trayGap - 10} rx="1.5" fill="#0c0c0e" />
+                                        {n.showAms && i === 0 && (
+                                            <rect x={n.x + 28} y={y + 8} width={n.w - 56} height={trayGap - 20} rx="3" fill="#1e293b" stroke="#22d3ee" />
+                                        )}
+                                    </g>
+                                );
+                            })}
                         </g>
-                    )}
-                    <rect x={n.x + 10} y={n.y + 8} width={n.w - 20} height={toolH} rx="3" fill="#0f172a" stroke="#334155" />
-                    <rect x={n.x + n.w / 2 - 16} y={n.y + 14} width="32" height="5" rx="2" fill="#64748b" />
-                    {[0, 1].map((i) => (
-                        <g key={i}>
-                            <rect x={n.x + 10} y={n.y + toolH + 16 + i * (drawerH + 6)} width={n.w - 20} height={drawerH} rx="4" fill={naked ? '#0f172a' : '#1e293b'} stroke="#334155" />
-                            <rect x={n.x + n.w / 2 - 20} y={n.y + toolH + 16 + i * (drawerH + 6) + drawerH / 2 - 3} width="40" height="6" rx="3" fill="#64748b" />
-                            {n.showAms && i === 0 && (
-                                <rect x={n.x + 22} y={n.y + toolH + 24} width={n.w - 44} height={drawerH - 16} rx="3" fill="#1e293b" stroke="#22d3ee" strokeWidth="1.5" />
+                    ) : (
+                        <g>
+                            <rect x={n.x} y={n.y} width={n.w} height={bodyH} rx="5" fill="url(#matteBlack)" stroke="#09090b" strokeWidth="1.6" />
+                            <rect x={n.x + 6} y={n.y + 6} width={n.w - 12} height={drawerH} rx="3" fill="#18181b" stroke="#27272a" />
+                            <BrandLine x={n.x + 12} y={n.y + 16} title="Panda Station" />
+                            <PullHandle x={n.x + n.w / 2 - 20} y={n.y + 18} />
+                            <rect x={n.x + 6} y={n.y + drawerH + 12} width={n.w - 12} height={bodyH - drawerH - 22} rx="4" fill="#111113" stroke="#27272a" />
+                            <rect x={n.x + n.w - 22} y={n.y + drawerH + 28} width="5" height={bodyH - drawerH - 56} rx="2" fill="#e4e4e7" />
+                            <circle cx={n.x + n.w - 28} cy={n.y + drawerH + 28} r="6" fill="#09090b" stroke="#22d3ee" strokeWidth="1.2" />
+                            <circle cx={n.x + n.w - 28} cy={n.y + drawerH + 28} r="2.2" fill="#67e8f9" />
+                            {n.showAms && (
+                                <rect x={n.x + 18} y={n.y + drawerH + 28} width={n.w - 56} height="36" rx="3" fill="#1e293b" stroke="#22d3ee" strokeWidth="1.2" />
                             )}
                         </g>
-                    ))}
-                    {!naked && (
-                        <rect x={n.x + 6} y={n.y + 6} width={n.w - 12} height={n.h - 14} rx="4" fill="url(#glassGrad)" opacity="0.2" />
                     )}
-                    <circle cx={n.x + 18} cy={n.y + n.h - 7} r="6" fill="#1e293b" stroke="#64748b" />
-                    <circle cx={n.x + n.w - 18} cy={n.y + n.h - 7} r="6" fill="#1e293b" stroke="#64748b" />
+                    <rect x={n.x + 4} y={n.y + bodyH - 6} width={n.w - 8} height="6" rx="1" fill="#18181b" />
                 </g>
             );
         }
 
         function DenNode({ n }) {
             const h2 = n.variant === 'h2';
+            const leftW = n.w * 0.56;
+            const rightW = n.w - leftW - 10;
+            const drawerY = n.y + 16;
+            const drawerH = n.h - 22;
             return (
                 <g>
-                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#475569" side="#020617" />
-                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="6" fill="#111827" stroke="#334155" strokeWidth="2" />
-                    <rect x={n.x} y={n.y} width={n.w} height="8" fill="#334155" />
-                    <rect x={n.x + 10} y={n.y + 14} width={n.w * 0.42} height={n.h - 24} rx="3" fill="#0f172a" stroke="#1e293b" />
-                    <text x={n.x + 14 + n.w * 0.18} y={n.y + n.h / 2 + 4} textAnchor="middle" fill="#64748b" fontSize="7" fontFamily="ui-monospace, monospace">WASTE</text>
-                    <rect x={n.x + n.w * 0.48} y={n.y + 14} width={n.w * 0.22} height={n.h - 24} rx="2" fill="#1e293b" />
-                    <rect x={n.x + n.w * 0.73} y={n.y + 14} width={n.w * 0.22} height={n.h - 24} rx="2" fill="#1e293b" />
-                    <rect x={n.x + 12} y={n.y + 2} width={n.w - 24} height="4" rx="1" fill="#10b981" filter="url(#glow)" />
-                    {h2 && <text x={n.x + n.w - 10} y={n.y + n.h - 8} textAnchor="end" fill="#f97316" fontSize="7">DEN H2</text>}
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#27272a" side="#09090b" />
+                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="5" fill="url(#matteBlack)" stroke="#18181b" strokeWidth="1.5" />
+                    <rect x={n.x + 4} y={n.y + 3} width={n.w - 8} height="8" rx="1.5" fill="#111113" stroke="#3f3f46" />
+                    <rect x={n.x + 18} y={n.y + 4} width="28" height="6" rx="1" fill="#09090b" stroke="#52525b" />
+                    <rect x={n.x + 52} y={n.y + 5} width="10" height="4" rx="0.8" fill="#09090b" stroke="#52525b" />
+                    {h2 && [10, n.w - 18, 28, n.w - 36].map((dx, i) => (
+                        <circle key={i} cx={n.x + dx} cy={n.y + 7} r="3.2" fill="#3f3f46" stroke="#71717a" />
+                    ))}
+                    <rect x={n.x + 6} y={drawerY} width={leftW} height={drawerH} rx="3" fill="#18181b" stroke="#3f3f46" />
+                    <BrandLine x={n.x + 12} y={drawerY + 12} title={h2 ? 'Panda Den H2' : 'Panda Den'} sub="For makers By makers" />
+                    <PullHandle x={n.x + 6 + leftW / 2 - 18} y={drawerY + drawerH / 2 + 4} />
+                    <rect x={n.x + leftW + 10} y={drawerY} width={rightW} height={drawerH} rx="3" fill="#18181b" stroke="#3f3f46" />
+                    <PullHandle x={n.x + leftW + 10 + rightW / 2 - 16} y={drawerY + drawerH / 2 - 3} w="32" />
+                    {h2 && (
+                        <g>
+                            {[0, 1, 2, 3, 4].map((i) => (
+                                <rect key={i} x={n.x + n.w + 6} y={n.y + 14 + i * 10} width="14" height="6" rx="1" fill="#27272a" stroke="#52525b" />
+                            ))}
+                        </g>
+                    )}
                 </g>
             );
         }
 
         function StackNode({ n }) {
-            const hex = [];
-            const inset = n.post + 4;
-            for (let row = 0; row < 7; row++) {
-                for (let col = 0; col < 2; col++) {
-                    hex.push({
-                        x: n.x + 7 + col * 8,
-                        y: n.y + n.shelf + 18 + row * 32
-                    });
-                    hex.push({
-                        x: n.x + n.w - 15 - col * 8,
-                        y: n.y + n.shelf + 18 + row * 32
-                    });
-                }
-            }
+            const sideW = Math.max(n.post, 16);
+            const innerX = n.x + sideW;
+            const innerW = n.w - sideW * 2;
             return (
                 <g>
-                    <IsoExtrude x={n.x - 4} y={n.y} w={n.w + 8} h={n.shelf + 6} top="#64748b" side="#1e293b" />
-                    <rect x={n.x} y={n.y} width={n.post} height={n.h} rx="3" fill="url(#metalGrad)" stroke="#0f172a" />
-                    <rect x={n.x + n.w - n.post} y={n.y} width={n.post} height={n.h} rx="3" fill="url(#metalGrad)" stroke="#0f172a" />
-                    {hex.map((p, i) => (
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#3f3f46" side="#111113" />
+                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="3" fill="#141416" stroke="#09090b" />
+                    <rect x={n.x + 3} y={n.y + n.shelf + 4} width={n.w - 6} height={n.h - n.shelf - 18} fill="url(#hexCut)" />
+                    <rect x={n.x} y={n.y} width={sideW} height={n.h} rx="3" fill="url(#hexCut)" stroke="#18181b" />
+                    <rect x={n.x + n.w - sideW} y={n.y} width={sideW} height={n.h} rx="3" fill="url(#hexCut)" stroke="#18181b" />
+                    <ellipse cx={n.x + sideW / 2} cy={n.y + n.h * 0.42} rx={sideW * 0.28} ry="11" fill="#09090b" stroke="#3f3f46" />
+                    <ellipse cx={n.x + n.w - sideW / 2} cy={n.y + n.h * 0.42} rx={sideW * 0.28} ry="11" fill="#09090b" stroke="#3f3f46" />
+                    <rect x={n.x - 3} y={n.y} width={n.w + 6} height={n.shelf + 4} rx="2" fill="#1c1c1f" stroke="#09090b" />
+                    <rect x={n.x + 4} y={n.y + 2} width={n.w - 8} height="4" rx="1" fill="#3f3f46" />
+                    <rect x={innerX + 4} y={n.trayY} width={innerW - 8} height={n.trayH} rx="3" fill="#18181b" stroke="#3f3f46" />
+                    <rect x={n.x + n.w / 2 - 14} y={n.trayY + n.trayH - 8} width="28" height="6" rx="1.5" fill="#52525b" />
+                    <rect x={n.x} y={n.y + n.h - 14} width={n.w} height="14" fill="#141416" />
+                    {[0, 1, 2, 3, 4, 5, 6].map((i) => (
                         <polygon
                             key={i}
-                            points={`${p.x},${p.y - 6} ${p.x + 5},${p.y - 3} ${p.x + 5},${p.y + 3} ${p.x},${p.y + 6} ${p.x - 5},${p.y + 3} ${p.x - 5},${p.y - 3}`}
-                            fill="none"
-                            stroke="#475569"
-                            strokeWidth="1"
+                            points={`${n.x + 78 + i * 14},${n.y + n.h - 11} ${n.x + 83 + i * 14},${n.y + n.h - 8} ${n.x + 83 + i * 14},${n.y + n.h - 4} ${n.x + 78 + i * 14},${n.y + n.h - 1} ${n.x + 73 + i * 14},${n.y + n.h - 4} ${n.x + 73 + i * 14},${n.y + n.h - 8}`}
+                            fill="#09090b"
+                            stroke="#3f3f46"
+                            strokeWidth="0.6"
                         />
                     ))}
-                    <rect x={n.x - 4} y={n.y} width={n.w + 8} height={n.shelf + 6} rx="3" fill="#334155" stroke="#0f172a" />
-                    <rect x={n.x} y={n.y + 2} width={n.w} height="5" fill="#94a3b8" opacity="0.45" />
-                    <rect x={n.x + inset} y={n.trayY} width={n.w - inset * 2} height={n.trayH} rx="4" fill="#1e293b" stroke="#334155" />
-                    <rect x={n.x + n.w / 2 - 22} y={n.trayY + n.trayH - 10} width="44" height="7" rx="3" fill="#64748b" />
-                    <text x={n.x + n.w / 2} y={n.trayY + 14} textAnchor="middle" fill="#64748b" fontSize="9" fontFamily="ui-monospace, monospace">AMS TRAY</text>
-                    <rect x={n.x} y={n.y + n.h - 8} width={n.w} height="8" fill="#334155" />
-                    <text x={n.x + 14} y={n.y + n.h - 12} fill="#64748b" fontSize="8" fontFamily="ui-monospace, monospace">PANDA STACK</text>
+                    <text x={n.x + 10} y={n.y + n.h - 4} fill="#f4f4f5" fontSize="8" fontFamily="ui-sans-serif, system-ui">Panda stack</text>
+                    <circle cx={n.x + 8} cy={n.y + n.h + 2} r="3" fill="#18181b" />
+                    <circle cx={n.x + n.w - 8} cy={n.y + n.h + 2} r="3" fill="#18181b" />
                 </g>
             );
         }
 
         function PerchNode({ n }) {
+            const plateH = 10;
+            const frameH = n.h - plateH;
             return (
                 <g>
-                    <rect x={n.x + 10} y={n.y + n.h} width="5" height="16" fill="#94a3b8" />
-                    <rect x={n.x + n.w - 15} y={n.y + n.h} width="5" height="16" fill="#94a3b8" />
-                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#cbd5e1" side="#475569" />
-                    <rect x={n.x} y={n.y} width={n.w} height={8} rx="2" fill="#94a3b8" stroke="#0f172a" />
-                    <rect x={n.x + 8} y={n.y + 2} width={n.w - 16} height="4" rx="1" fill="#e2e8f0" />
+                    <polygon
+                        points={`${n.x + 18},${n.y + n.h} ${n.x + n.w - 18},${n.y + n.h} ${n.x + n.w - 4},${n.y + plateH} ${n.x + 4},${n.y + plateH}`}
+                        fill="url(#hexCutLite)"
+                        stroke="#1c1917"
+                    />
+                    <rect x={n.x + 16} y={n.y + plateH + 4} width={n.w - 32} height={frameH - 6} fill="url(#hexCutLite)" stroke="#292524" />
+                    <rect x={n.x + 10} y={n.y + n.h} width="6" height="14" rx="1" fill="#44403c" />
+                    <rect x={n.x + n.w - 16} y={n.y + n.h} width="6" height="14" rx="1" fill="#44403c" />
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={plateH} top="#ef4444" side="#7f1d1d" />
+                    <rect x={n.x} y={n.y} width={n.w} height={plateH} rx="2" fill="url(#perchRed)" stroke="#7f1d1d" />
+                    <rect x={n.x + 2} y={n.y + 1} width={n.w - 4} height="3" rx="1" fill="#fca5a5" opacity="0.55" />
+                    {[0, 1, 2, 3].map((i) => (
+                        <circle key={i} cx={n.x + n.w * 0.28 + i * 28} cy={n.y + 7} r="1.4" fill="#18181b" />
+                    ))}
                 </g>
             );
         }
@@ -410,7 +601,7 @@
                     {n.guard && Array.from({ length: slots }).map((_, i) => (
                         <rect key={'g'+i} x={n.x + 12 + i * slotW} y={n.y + n.h - 8} width="8" height="7" rx="1" fill="#f8fafc" filter="url(#glow)" />
                     ))}
-                    {pro && <rect x={n.x + 6} y={n.y + 2} width="20" height="5" rx="1" fill="#22d3ee" />}
+                    {pro && <rect className="led-pulse" x={n.x + 6} y={n.y + 2} width="20" height="5" rx="1" fill="#22d3ee" filter="url(#glow)" />}
                 </g>
             );
         }
@@ -501,13 +692,15 @@
                         <rect x={fx + fw - doorInset - 5} y={fy + fh * 0.48} width="13" height="6" rx="3" fill="#f8fafc" />
                     )}
 
-                    <rect x={fx + doorInset + 8} y={doorY + 8} width={doorW - 16} height={u.frame_top ? 6 : 4} fill={u.frame_top ? '#fcd34d' : '#1e293b'} filter={u.frame_top ? 'url(#glow)' : ''} />
+                    {u.frame_top
+                        ? <LuxBar x={fx + doorInset + 8} y={doorY + 8} w={doorW - 16} h={6} />
+                        : <rect x={fx + doorInset + 8} y={doorY + 8} width={doorW - 16} height="4" fill="#1e293b" />}
                     <rect x={fx + fw - doorInset - 8} y={doorY + 16} width="5" height={doorH - 28} fill="#1e293b" />
 
                     <rect x={fx + doorInset + 16} y={fy + fh - 42} width={doorW - 32} height="9" rx="2" fill="#1e293b" />
                     <rect x={fx + doorInset + 16} y={fy + fh - 46} width={doorW - 32} height="5" rx="1" fill={u.buildplate ? '#3b82f6' : '#475569'} filter={u.buildplate ? 'url(#glow)' : ''} />
                     {u.under_bed && (
-                        <rect x={fx + doorInset + 18} y={fy + fh - 36} width={doorW - 36} height="5" rx="2" fill="url(#rainbowGrad)" filter="url(#glow)" />
+                        <StatusBar x={fx + doorInset + 18} y={fy + fh - 36} w={doorW - 36} h={5} />
                     )}
 
                     <rect x={fx + doorInset + 10} y={doorY + 36} width={doorW - 20} height="5" fill="#475569" />
@@ -518,14 +711,14 @@
                         <circle cx={dual ? 16 : 14} cy="17" r="5" fill={u.extruder ? '#fbbf24' : '#0f172a'} filter={u.extruder ? 'url(#glow)' : ''} />
                         <circle cx={dual ? 44 : 30} cy="17" r="5" fill={u.extruder ? '#fbbf24' : '#0f172a'} filter={u.extruder ? 'url(#glow)' : ''} />
                         {u.toolhead_front ? (
-                            <circle cx={dual ? 30 : 22} cy="34" r="8" fill="#111" stroke="#fff" strokeWidth="2" />
+                            <KnomiFace cx={dual ? 30 : 22} cy={34} r={8} />
                         ) : (
                             <circle cx={dual ? 30 : 22} cy="34" r="6" fill="#020617" />
                         )}
                     </g>
 
                     {u.chamber_back && (
-                        <rect x={fx + fw - 46} y={doorY + 20} width="20" height="36" rx="3" fill="#2dd4bf" opacity="0.75" filter="url(#glow)" />
+                        <rect className="led-pulse" x={fx + fw - 46} y={doorY + 20} width="20" height="36" rx="3" fill="#2dd4bf" filter="url(#glow)" />
                     )}
                     {u.usb_hub && <rect x={fx + fw - 16} y={fy + 88} width="10" height="28" rx="2" fill="#a855f7" filter="url(#glow)" />}
                     {u.power && <rect x={fx + 6} y={fy + fh - 20} width="16" height="12" rx="2" fill="#22c55e" />}
@@ -553,10 +746,10 @@
                     <rect x={n.x + 6} y={baseY + 5} width={n.w - 14} height="9" rx="2" fill="#1e293b" />
                     <rect x={n.x + 20} y={baseY - 12} width={n.w - (mini ? 68 : 50)} height="12" rx="2" fill={u.buildplate ? '#3b82f6' : '#334155'} filter={u.buildplate ? 'url(#glow)' : ''} />
                     {u.under_bed && (
-                        <rect x={n.x + 24} y={baseY + 1} width={n.w - (mini ? 76 : 58)} height="5" rx="2" fill="url(#rainbowGrad)" filter="url(#glow)" />
+                        <StatusBar x={n.x + 24} y={baseY + 1} w={n.w - (mini ? 76 : 58)} h={5} />
                     )}
                     {u.chamber_back && (
-                        <rect x={n.x + 10} y={baseY + 16} width="28" height="16" rx="3" fill="#2dd4bf" opacity="0.8" filter="url(#glow)" />
+                        <rect className="led-pulse" x={n.x + 10} y={baseY + 16} width="28" height="16" rx="3" fill="#2dd4bf" filter="url(#glow)" />
                     )}
                     {u.usb_hub && <rect x={n.x + n.w - 52} y={baseY + 16} width="10" height="18" rx="2" fill="#a855f7" filter="url(#glow)" />}
                     <rect x={n.x + n.w - 38} y={baseY + 10} width="26" height="18" rx="2" fill="#0f172a" stroke="#334155" />
@@ -564,8 +757,12 @@
 
                     {!mini && <rect x={leftX} y={topY} width={pillarW} height={baseY - topY} rx="3" fill="url(#lightFrame)" stroke="#94a3b8" />}
                     <rect x={rightX} y={topY} width={pillarW} height={baseY - topY} rx="3" fill="url(#lightFrame)" stroke="#94a3b8" />
-                    {!mini && <rect x={leftX} y={topY} width={rightX + pillarW - leftX} height="11" rx="2" fill={u.frame_top ? '#fcd34d' : '#cbd5e1'} filter={u.frame_top ? 'url(#glow)' : ''} />}
-                    {mini && <rect x={n.x + 14} y={gantryY} width={rightX - n.x - 8} height="13" rx="2" fill={u.frame_top ? '#fcd34d' : '#cbd5e1'} stroke="#94a3b8" filter={u.frame_top ? 'url(#glow)' : ''} />}
+                    {!mini && (u.frame_top
+                        ? <LuxBar x={leftX} y={topY} w={rightX + pillarW - leftX} h={11} />
+                        : <rect x={leftX} y={topY} width={rightX + pillarW - leftX} height="11" rx="2" fill="#cbd5e1" />)}
+                    {mini && (u.frame_top
+                        ? <LuxBar x={n.x + 14} y={gantryY} w={rightX - n.x - 8} h={13} />
+                        : <rect x={n.x + 14} y={gantryY} width={rightX - n.x - 8} height="13" rx="2" fill="#cbd5e1" stroke="#94a3b8" />)}
                     {!mini && <rect x={leftX + 4} y={gantryY} width={rightX - leftX + pillarW - 8} height="13" rx="2" fill="#cbd5e1" stroke="#94a3b8" />}
 
                     <text x={rightX + 3} y={topY + 26} fill="#334155" fontSize="6" fontFamily="ui-sans-serif, system-ui">{mini ? 'A1 mini' : 'A1'}</text>
@@ -581,8 +778,12 @@
                     <g transform={`translate(${headX}, ${gantryY - 24})`}>
                         <rect width="40" height="40" rx="5" fill="#e2e8f0" stroke="#94a3b8" />
                         <rect x="8" y="6" width="24" height="10" rx="1" fill="#cbd5e1" />
-                        <circle cx="20" cy="26" r={u.toolhead_front ? 8 : 7} fill={u.toolhead_front ? '#111' : '#f59e0b'} stroke={u.toolhead_front ? '#fff' : '#b45309'} strokeWidth="2" />
-                        {u.extruder && <circle cx="10" cy="10" r="3" fill="#fbbf24" />}
+                        {u.toolhead_front ? (
+                            <KnomiFace cx={20} cy={26} r={8} />
+                        ) : (
+                            <circle cx="20" cy="26" r="7" fill="#f59e0b" stroke="#b45309" strokeWidth="2" />
+                        )}
+                        {u.extruder && <circle className="led-pulse" cx="10" cy="10" r="3" fill="#fbbf24" />}
                     </g>
                     {u.power && <rect x={n.x + 8} y={baseY + 16} width="14" height="10" rx="2" fill="#22c55e" />}
                 </g>
@@ -655,36 +856,64 @@
                         <rect x={fx + 36} y={bodyY + bodyH - 20} width={n.w - 72} height="10" rx="2" fill="#a3e635" filter="url(#glow)" />
                     )}
 
-                    {capH > 0 && (
-                        <g>
-                            <IsoExtrude
-                                x={fx}
-                                y={bodyY - capH}
-                                w={n.w}
-                                h={capH}
-                                top="rgba(186,230,253,0.45)"
-                                side="rgba(8,47,73,0.55)"
-                                stroke="#7dd3fc"
-                            />
-                            <rect x={fx} y={bodyY - capH} width={n.w} height={capH} rx="4" fill="url(#popcapGlass)" stroke="#7dd3fc" strokeWidth="1.6" />
-                            <rect x={fx + 16} y={bodyY - capH + 14} width={n.w - 32} height={capH - 28} rx="3" fill="#38bdf8" opacity="0.08" stroke="#7dd3fc" strokeDasharray="5 4" strokeOpacity="0.7" />
-                            <text x={fx + 22} y={bodyY - capH + capH / 2 + 3} fill="#7dd3fc" fontSize="8" fontFamily="ui-sans-serif, system-ui" opacity="0.9">magnetic hatch</text>
-                            {[0, 1, 2, 3].map((i) => (
-                                <rect
-                                    key={i}
-                                    x={fx + 22 + i * 28 + isoX * 0.35}
-                                    y={bodyY - capH - isoY + 6}
-                                    width="20"
-                                    height="6"
-                                    rx="1"
-                                    fill="#0f172a"
+                    {capH > 0 && (() => {
+                        const topY = bodyY - capH;
+                        const tray = 18;
+                        const midY = topY + tray;
+                        const botY = bodyY;
+                        const hatchX = fx + 12;
+                        const hatchY = midY + 8;
+                        const hatchW = n.w - 24;
+                        const hatchH = capH - tray - 22;
+                        const waves = [];
+                        for (let i = 0; i <= 24; i++) {
+                            const t = i / 24;
+                            waves.push(`${fx + n.w + Math.abs(Math.sin(t * 4 * Math.PI)) * 8},${botY - t * (botY - midY)}`);
+                        }
+                        const sidePts = [`${fx + n.w},${botY}`, ...waves, `${fx + n.w + isoX},${midY - isoY}`, `${fx + n.w + isoX},${botY - isoY}`].join(' ');
+                        return (
+                            <g>
+                                <polygon points={sidePts} fill="rgba(125,211,252,0.16)" stroke="#7dd3fc" strokeWidth="1.1" />
+                                {[0, 1, 2, 3, 4, 5].map((i) => (
+                                    <line
+                                        key={i}
+                                        x1={fx + n.w + 5 + i * 4.4}
+                                        y1={midY - isoY * 0.35}
+                                        x2={fx + n.w + 5 + i * 4.4}
+                                        y2={botY - 10}
+                                        stroke="#67e8f9"
+                                        strokeOpacity="0.35"
+                                        strokeWidth="1.2"
+                                    />
+                                ))}
+                                <polygon
+                                    points={`${fx},${topY} ${fx + n.w},${topY} ${fx + n.w + isoX},${topY - isoY} ${fx + isoX},${topY - isoY}`}
+                                    fill="rgba(224,242,254,0.4)"
                                     stroke="#7dd3fc"
-                                    strokeOpacity="0.55"
                                 />
-                            ))}
-                            <text x={fx + n.w + isoX - 8} y={bodyY - capH - isoY + 12} textAnchor="end" fill="#7dd3fc" fontSize="7" fontFamily="ui-monospace, monospace">POPCAP</text>
-                        </g>
-                    )}
+                                <rect x={fx + 18} y={topY + 4} width={n.w - 36} height={9} rx="2" fill="rgba(8,47,73,0.12)" stroke="#67e8f9" strokeOpacity="0.55" />
+                                <path
+                                    d={`M ${fx} ${botY} L ${fx} ${midY} L ${fx + n.w} ${midY} L ${fx + n.w} ${botY} Z`}
+                                    fill="url(#popcapGlass)"
+                                    stroke="#67e8f9"
+                                    strokeWidth="1.4"
+                                />
+                                <rect x={hatchX} y={hatchY} width={hatchW} height={hatchH} rx="9" fill="rgba(186,230,253,0.07)" stroke="#a5f3fc" strokeWidth="1.3" />
+                                {[[0, 0], [1, 0], [0, 1], [1, 1]].map(([cx, cy], i) => (
+                                    <circle
+                                        key={i}
+                                        cx={hatchX + 8 + cx * (hatchW - 16)}
+                                        cy={hatchY + 8 + cy * (hatchH - 16)}
+                                        r="2.1"
+                                        fill="#334155"
+                                    />
+                                ))}
+                                <rect x={fx + n.w / 2 - 20} y={hatchY + hatchH * 0.58} width="40" height="6" rx="3" fill="#cbd5e1" stroke="#94a3b8" />
+                                <rect x={fx - 2} y={botY - 7} width={n.w + 4} height="8" rx="1.5" fill="rgba(248,250,252,0.35)" stroke="#e2e8f0" />
+                                <text x={fx + 10} y={botY - 12} fill="#f8fafc" fontSize="8" fontFamily="ui-sans-serif, system-ui" fontWeight="600">PopCap</text>
+                            </g>
+                        );
+                    })()}
                 </g>
             );
         }
