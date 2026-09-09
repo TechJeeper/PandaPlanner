@@ -928,7 +928,7 @@
             const order = ['desk', 'station', 'stack', 'den', 'feed_rack', 'printer', 'perch', 'ams', 'touch'];
             const sorted = [...scene.nodes].sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
             return (
-                <svg viewBox={scene.viewBox} className="w-full h-full max-h-[62vh] object-contain drop-shadow-2xl">
+                <svg viewBox={scene.viewBox} preserveAspectRatio="xMidYMid meet" className="w-full h-full drop-shadow-2xl">
                     <SvgDefs />
                     {sorted.map((n, i) => {
                         const key = n.kind + '-' + i;

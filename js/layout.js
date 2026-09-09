@@ -278,14 +278,17 @@
             });
         }
 
-        let minX = 0, minY = 0, maxX = 560, maxY = 680;
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         nodes.forEach((n) => {
-            minX = Math.min(minX, n.x - 24);
-            minY = Math.min(minY, n.y - ISO.y - 20);
-            maxX = Math.max(maxX, n.x + n.w + ISO.x + 24);
-            maxY = Math.max(maxY, n.y + n.h + (n.wheelH || 0) + 20);
+            minX = Math.min(minX, n.x - 16);
+            minY = Math.min(minY, n.y - ISO.y - 12);
+            maxX = Math.max(maxX, n.x + n.w + (n.isoX || ISO.x) + 16);
+            maxY = Math.max(maxY, n.y + n.h + (n.wheelH || 0) + 16);
         });
-        const pad = 16;
+        if (!isFinite(minX)) {
+            minX = 0; minY = 0; maxX = 560; maxY = 680;
+        }
+        const pad = 20;
         const viewBox = [minX - pad, minY - pad, (maxX - minX) + pad * 2, (maxY - minY) + pad * 2].join(' ');
 
         return { nodes, viewBox, printerNode, supportLeft, supportW };
