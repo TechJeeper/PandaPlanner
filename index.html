@@ -44,7 +44,7 @@
     <script src="js/layout.js"></script>
 
     <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+        const { useState, useMemo, useEffect, useRef } = React;
 
         function trackGoatEvent(path, title) {
             const payload = { path, title, event: true };
@@ -67,6 +67,7 @@
             ChevronLeft: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>,
             ExternalLink: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>,
             Check: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
+            Link: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>,
             Printer: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>,
             PandaFace: ({className}) => (
                 <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -196,6 +197,15 @@
                         <stop offset="0%" stopColor="#f8fafc" stopOpacity="0.55" />
                         <stop offset="40%" stopColor="#94a3b8" stopOpacity="0.22" />
                         <stop offset="100%" stopColor="#1e293b" stopOpacity="0.35" />
+                    </linearGradient>
+                    <linearGradient id="amsLiteSpine" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#f8fafc" />
+                        <stop offset="55%" stopColor="#e2e8f0" />
+                        <stop offset="100%" stopColor="#94a3b8" />
+                    </linearGradient>
+                    <linearGradient id="amsBody" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#334155" />
+                        <stop offset="100%" stopColor="#0f172a" />
                     </linearGradient>
                     <linearGradient id="perchRed" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#f87171" />
@@ -500,110 +510,296 @@
         }
 
         function FeedRackNode({ n }) {
-            const post = 5;
+            const post = 8;
             const spoolTiers = 3;
             const boxTiers = 2;
-            const tierH = (n.h - 16) / (spoolTiers + boxTiers);
-            const spoolColors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#f472b6', '#22d3ee', '#e2e8f0'];
+            const foot = 12;
+            const innerX = n.x + post + 3;
+            const innerW = n.w - post * 2 - 6;
+            const bodyH = n.h - foot;
+            const spoolH = (bodyH * 0.56) / spoolTiers;
+            const boxH = (bodyH - spoolH * spoolTiers) / boxTiers;
+            const spoolColors = ['#eab308', '#3b82f6', '#22c55e', '#ef4444', '#f97316', '#a855f7', '#78716c', '#94a3b8', '#111827', '#f43f5e'];
+            const spoolCount = 10;
+            const boxCount = 8;
+            const r = Math.min(spoolH * 0.42, innerW / spoolCount * 1.55);
             return (
                 <g>
-                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#334155" side="#0f172a" />
-                    <rect x={n.x} y={n.y} width={post} height={n.h} fill="#1e293b" stroke="#0f172a" />
-                    <rect x={n.x + n.w - post} y={n.y} width={post} height={n.h} fill="#1e293b" stroke="#0f172a" />
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h - 4} top="#3f3f46" side="#18181b" />
+                    <rect x={n.x} y={n.y} width={post} height={bodyH} fill="#1c1917" stroke="#09090b" />
+                    <rect x={n.x + n.w - post} y={n.y} width={post} height={bodyH} fill="#1c1917" stroke="#09090b" />
+                    <rect x={n.x + 3} y={n.y} width={3} height={bodyH} fill="#292524" />
+                    <rect x={n.x + n.w - 6} y={n.y} width={3} height={bodyH} fill="#292524" />
                     {Array.from({ length: spoolTiers }).map((_, t) => {
-                        const y = n.y + 10 + t * tierH;
+                        const y = n.y + t * spoolH;
+                        const railY = y + spoolH - 10;
                         return (
                             <g key={'s' + t}>
-                                <rect x={n.x} y={y + tierH - 8} width={n.w} height="4" fill="#334155" />
-                                <rect x={n.x} y={y + tierH - 18} width={n.w} height="4" fill="#334155" />
-                                {spoolColors.map((c, i) => (
-                                    <circle key={i} cx={n.x + 16 + i * 20} cy={y + tierH - 22} r="8" fill="none" stroke={c} strokeWidth="4" />
-                                ))}
+                                <rect x={n.x} y={railY} width={n.w} height="3.5" fill="#44403c" />
+                                <rect x={n.x} y={railY - 11} width={n.w} height="3.5" fill="#44403c" />
+                                {spoolColors.map((c, i) => {
+                                    const cx = innerX + (i + 0.5) * (innerW / spoolCount);
+                                    const cy = railY - r + 2;
+                                    return (
+                                        <g key={i}>
+                                            <circle cx={cx} cy={cy} r={r} fill="#18181b" stroke="#0a0a0a" strokeWidth="1.2" />
+                                            <circle cx={cx} cy={cy} r={r * 0.72} fill="none" stroke={c} strokeWidth={r * 0.28} />
+                                            <circle cx={cx} cy={cy} r={r * 0.2} fill="#111113" stroke="#52525b" strokeWidth="0.8" />
+                                        </g>
+                                    );
+                                })}
                             </g>
                         );
                     })}
                     {Array.from({ length: boxTiers }).map((_, t) => {
-                        const y = n.y + 10 + (spoolTiers + t) * tierH;
+                        const y = n.y + spoolTiers * spoolH + t * boxH;
+                        const slot = innerW / boxCount;
+                        const bw = slot * 0.7;
+                        const bh = boxH * 0.62;
+                        const pivotY = y + boxH - 11;
                         return (
                             <g key={'b' + t}>
-                                <rect x={n.x} y={y + tierH - 6} width={n.w} height="5" fill="#334155" />
-                                {Array.from({ length: 7 }).map((_, i) => (
-                                    <rect
-                                        key={i}
-                                        x={n.x + 10 + i * 23}
-                                        y={y + 10}
-                                        width="18"
-                                        height={tierH - 20}
-                                        rx="1"
-                                        fill="#d6b48a"
-                                        stroke="#a16207"
-                                        transform={`rotate(-18 ${n.x + 19 + i * 23} ${y + tierH - 8})`}
-                                    />
-                                ))}
+                                <rect x={n.x} y={pivotY} width={n.w} height="4" fill="#44403c" />
+                                <rect x={n.x} y={pivotY - 9} width={n.w} height="3" fill="#44403c" />
+                                {Array.from({ length: boxCount }).map((_, i) => {
+                                    const cx = innerX + slot * (i + 0.5);
+                                    return (
+                                        <g key={i} transform={`rotate(-26 ${cx} ${pivotY})`}>
+                                            <rect
+                                                x={cx - bw / 2}
+                                                y={pivotY - bh}
+                                                width={bw}
+                                                height={bh}
+                                                rx="1.5"
+                                                fill="#d6b894"
+                                                stroke="#a16207"
+                                            />
+                                            <rect x={cx - 5} y={pivotY - bh + 8} width="10" height="8" rx="1" fill="#1c1917" />
+                                        </g>
+                                    );
+                                })}
                             </g>
                         );
                     })}
-                    <rect x={n.x} y={n.y + n.h - 6} width={n.w} height="6" fill="#334155" />
+                    <rect x={n.x} y={n.y + bodyH - 5} width={n.w} height="5" fill="#292524" />
+                    <rect x={n.x + 4} y={n.y + n.h - 6} width="7" height="6" rx="1" fill="#78716c" />
+                    <rect x={n.x + n.w - 11} y={n.y + n.h - 6} width="7" height="6" rx="1" fill="#78716c" />
+                </g>
+            );
+        }
+
+        function FilamentSpool({ cx, cy, r, color }) {
+            return (
+                <g>
+                    <ellipse cx={cx} cy={cy + r * 0.1} rx={r * 1.02} ry={r * 0.22} fill="#020617" opacity="0.28" />
+                    <circle cx={cx} cy={cy} r={r} fill={color} stroke="#1c1917" strokeWidth="1.3" />
+                    <circle cx={cx} cy={cy} r={r * 0.78} fill="none" stroke="#0f172a" strokeOpacity="0.2" strokeWidth="3.2" />
+                    <circle cx={cx} cy={cy} r={r * 0.44} fill="#e2e8f0" stroke="#64748b" />
+                    <circle cx={cx} cy={cy} r={r * 0.24} fill="#94a3b8" />
+                    <circle cx={cx} cy={cy} r={r * 0.09} fill="#1e293b" />
+                </g>
+            );
+        }
+
+        function AmsLiteNode({ n }) {
+            const colors = SPOOL_COLORS;
+            const cx = n.x + n.w / 2;
+            const rFront = Math.min(n.w, n.h) * 0.175;
+            const rRear = rFront * 0.78;
+            const feederW = n.w * 0.2;
+            const feederH = Math.max(18, n.h * 0.14);
+            const feederY = n.y + 1;
+            const feeders = [
+                { x: cx - feederW - 2, y: feederY },
+                { x: cx + 2, y: feederY }
+            ];
+            const rear = [
+                { x: cx - rFront * 0.42, y: n.y + n.h * 0.32, c: colors[0], r: rRear },
+                { x: cx + rFront * 0.42, y: n.y + n.h * 0.32, c: colors[1], r: rRear }
+            ];
+            const front = [
+                { x: cx - rFront * 1.58, y: n.y + n.h * 0.73, c: colors[2], r: rFront },
+                { x: cx + rFront * 1.58, y: n.y + n.h * 0.73, c: colors[3], r: rFront }
+            ];
+            const lean = n.w * 0.1;
+            const spineW = Math.max(11, n.w * 0.1);
+            const baseTop = n.y + n.h - 18;
+            const side = n.placement === 'side';
+            const tubeStarts = feeders.flatMap((f) => [0.32, 0.68].map((t) => ({ x: f.x + feederW * t, y: f.y + 2 })));
+            const hub = (s, i) => (
+                <g key={i}>
+                    <FilamentSpool cx={s.x} cy={s.y} r={s.r} color={s.c} />
+                    {[0, 90, 180, 270].map((deg) => (
+                        <rect key={deg} x={s.x - 1.6} y={s.y - s.r * 0.42} width="3.2" height={s.r * 0.42} rx="0.8" fill="#64748b" transform={`rotate(${deg} ${s.x} ${s.y})`} />
+                    ))}
+                    <circle cx={s.x} cy={s.y} r={4.2} fill="#facc15" stroke="#ca8a04" />
+                </g>
+            );
+            return (
+                <g>
+                    {side && tubeStarts.map((t, i) => (
+                        <path
+                            key={'t'+i}
+                            d={`M ${t.x} ${t.y} C ${t.x - 28} ${n.y - 26 - i * 4}, ${n.x - 12} ${n.y + 2 + i * 3}, ${n.x - 20} ${n.y + 20 + i * 9}`}
+                            fill="none"
+                            stroke={['#e2e8f0', '#cbd5e1', '#94a3b8', '#64748b'][i]}
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                        />
+                    ))}
+                    <ellipse cx={cx} cy={n.y + n.h - 2} rx={n.w * 0.46} ry="4.5" fill="#020617" opacity="0.3" />
+                    <path
+                        d={`M ${n.x + 4} ${n.y + n.h} L ${cx - 18} ${baseTop} L ${cx + 18} ${baseTop} L ${n.x + n.w - 4} ${n.y + n.h} Z`}
+                        fill="#111827"
+                        stroke="#0f172a"
+                    />
+                    <path
+                        d={`M ${cx - 22} ${n.y + n.h} L ${cx - 8} ${baseTop + 2} L ${cx + 8} ${baseTop + 2} L ${cx + 22} ${n.y + n.h} Z`}
+                        fill="#1e293b"
+                    />
+                    <polygon
+                        points={`${cx - spineW / 2 + lean},${feederY + feederH} ${cx + spineW / 2 + lean},${feederY + feederH} ${cx + spineW / 2 - 2},${baseTop} ${cx - spineW / 2 - 2},${baseTop}`}
+                        fill="url(#amsLiteSpine)"
+                        stroke="#cbd5e1"
+                    />
+                    <circle cx={cx + lean * 0.25} cy={n.y + n.h * 0.5} r={8} fill="#e2e8f0" stroke="#94a3b8" />
+                    {rear.map(hub)}
+                    {front.map(hub)}
+                    {feeders.map((f, i) => (
+                        <g key={'fd'+i}>
+                            <rect x={f.x} y={f.y} width={feederW} height={feederH} rx="3.5" fill="#0b1220" stroke="#020617" strokeWidth="1.4" />
+                            <rect x={f.x + 3} y={f.y + 3} width={feederW - 6} height="4" rx="1" fill="#1e293b" />
+                            {[0.3, 0.7].map((t, k) => (
+                                <circle key={k} cx={f.x + feederW * t} cy={f.y + feederH * 0.62} r={Math.max(4, feederW * 0.16)} fill="#facc15" stroke="#a16207" strokeWidth="1.2" />
+                            ))}
+                            {n.guard && [0.3, 0.7].map((t, k) => (
+                                <rect key={'g'+k} x={f.x + feederW * t - 3} y={f.y - 5} width="6" height="6" rx="1" fill="#f8fafc" filter="url(#glow)" />
+                            ))}
+                        </g>
+                    ))}
+                </g>
+            );
+        }
+
+        function EnclosedAmsNode({ n }) {
+            const colors = SPOOL_COLORS;
+            const pro = n.variant === 'ams_2_pro';
+            const slots = 4;
+            const lidH = Math.max(12, n.h * 0.26);
+            const slotW = (n.w - 16) / slots;
+            const ix = PP.ISO.x;
+            const iy = PP.ISO.y;
+            return (
+                <g>
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top={pro ? '#1e293b' : '#334155'} side="#020617" />
+                    <polygon
+                        points={`${n.x},${n.y} ${n.x + n.w},${n.y} ${n.x + n.w + ix},${n.y - iy} ${n.x + ix},${n.y - iy}`}
+                        fill="url(#amsLid)"
+                        stroke="#334155"
+                    />
+                    {Array.from({ length: slots }).map((_, i) => {
+                        const sx = n.x + 10 + i * slotW + ix * 0.35;
+                        const sy = n.y - iy * 0.55;
+                        return (
+                            <ellipse key={'top'+i} cx={sx + (slotW - 6) / 2} cy={sy} rx={(slotW - 8) / 2} ry={Math.max(3, iy * 0.28)} fill={colors[i]} opacity="0.85" />
+                        );
+                    })}
+                    {pro && Array.from({ length: slots }).map((_, i) => (
+                        <circle key={'port'+i} cx={n.x + 14 + i * slotW + ix * 0.4} cy={n.y - iy * 0.85} r="3.2" fill="#0f172a" stroke="#64748b" />
+                    ))}
+                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="6" fill="url(#amsBody)" stroke="#334155" strokeWidth="1.6" />
+                    <rect x={n.x + 5} y={n.y + 4} width={n.w - 10} height={lidH} rx="3" fill="url(#amsLid)" stroke="#475569" />
+                    {Array.from({ length: slots }).map((_, i) => (
+                        <ellipse
+                            key={i}
+                            cx={n.x + 8 + i * slotW + (slotW - 6) / 2}
+                            cy={n.y + 6 + lidH * 0.42}
+                            rx={(slotW - 10) / 2}
+                            ry={Math.max(5, lidH * 0.28)}
+                            fill={colors[i]}
+                            opacity="0.7"
+                        />
+                    ))}
+                    <rect x={n.x + 6} y={n.y + lidH + 8} width={n.w - 12} height={n.h - lidH - 14} rx="3" fill="#111827" stroke="#1e293b" />
+                    <text x={n.x + 12} y={n.y + lidH + 22} fill="#94a3b8" fontSize="7" fontFamily="ui-sans-serif, system-ui">{pro ? 'AMS 2 Pro' : 'AMS'}</text>
+                    {pro
+                        ? <rect className="led-pulse" x={n.x + n.w - 28} y={n.y + lidH + 14} width="16" height="5" rx="1.5" fill="#22d3ee" filter="url(#glow)" />
+                        : <circle cx={n.x + n.w - 14} cy={n.y + lidH + 17} r="3" fill="#4ade80" />}
+                    {pro && [0, 1, 2].map((i) => (
+                        <rect key={'v'+i} x={n.x + n.w - 8} y={n.y + lidH + 26 + i * 6} width="5" height="3" rx="0.6" fill="#334155" />
+                    ))}
+                    {n.guard && Array.from({ length: slots }).map((_, i) => (
+                        <rect key={'g'+i} x={n.x + 12 + i * slotW} y={n.y + n.h - 9} width="8" height="6" rx="1" fill="#f8fafc" filter="url(#glow)" />
+                    ))}
+                </g>
+            );
+        }
+
+        function AmsHtNode({ n }) {
+            const color = SPOOL_COLORS[n.index % SPOOL_COLORS.length];
+            const wide = n.w > n.h * 0.75;
+            const ix = PP.ISO.x;
+            const iy = PP.ISO.y;
+            if (wide) {
+                const lidH = Math.max(14, n.h * 0.3);
+                const spoolR = Math.min(n.w, n.h) * 0.28;
+                return (
+                    <g>
+                        <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#334155" side="#1c1917" />
+                        <polygon
+                            points={`${n.x},${n.y} ${n.x + n.w},${n.y} ${n.x + n.w + ix},${n.y - iy} ${n.x + ix},${n.y - iy}`}
+                            fill="url(#amsLid)"
+                            stroke="#334155"
+                        />
+                        <ellipse cx={n.x + n.w / 2 + ix * 0.35} cy={n.y - iy * 0.45} rx={n.w * 0.22} ry={iy * 0.32} fill={color} opacity="0.85" />
+                        <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="5" fill="url(#amsBody)" stroke="#ea580c" strokeWidth="1.2" />
+                        <rect x={n.x + 6} y={n.y + 5} width={n.w - 12} height={lidH} rx="3" fill="url(#amsLid)" stroke="#475569" />
+                        <FilamentSpool cx={n.x + n.w / 2} cy={n.y + 8 + lidH * 0.55} r={spoolR} color={color} />
+                        <rect x={n.x + 8} y={n.y + lidH + 12} width={36} height="12" rx="2" fill="#020617" stroke="#334155" />
+                        <text x={n.x + 26} y={n.y + lidH + 21} textAnchor="middle" fill="#4ade80" fontSize="5">AMS HT</text>
+                        <rect className="led-pulse" x={n.x + n.w - 22} y={n.y + lidH + 14} width="10" height="5" rx="1" fill="#f97316" />
+                        <rect x={n.x + 6} y={n.y + n.h - 10} width={n.w - 12} height="5" rx="1" fill="#7c2d12" />
+                        {n.guard && <rect x={n.x + n.w / 2 - 4} y={n.y - 5} width="8" height="6" rx="1" fill="#f8fafc" />}
+                        <rect x={n.x + n.w - 12} y={n.y - 3} width="6" height="5" rx="1" fill="#334155" />
+                    </g>
+                );
+            }
+            const winX = n.x + 4;
+            const winW = Math.max(10, n.w - 8);
+            const winY = n.y + 20;
+            const winH = n.h - 32;
+            return (
+                <g>
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#334155" side="#1c1917" />
+                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="4" fill="url(#amsBody)" stroke="#ea580c" strokeWidth="1.2" />
+                    <rect x={n.x + 3} y={n.y + 3} width={n.w - 6} height="13" rx="2" fill="#020617" />
+                    <text x={n.x + n.w / 2} y={n.y + 12} textAnchor="middle" fill="#4ade80" fontSize="5">HT</text>
+                    <rect x={winX} y={winY} width={winW} height={winH} rx="2" fill="#0f172a" stroke="#334155" />
+                    <rect x={winX + 1.5} y={winY + 2} width={winW - 3} height={winH - 4} rx="1.5" fill="url(#amsLid)" />
+                    <ellipse cx={n.x + n.w / 2} cy={winY + winH * 0.52} rx={winW * 0.22} ry={winH * 0.36} fill="none" stroke={color} strokeWidth="4" />
+                    <rect x={n.x + 3} y={n.y + n.h - 8} width={n.w - 6} height="4" rx="1" fill="#7c2d12" />
+                    {n.guard && <rect x={n.x + n.w / 2 - 3} y={n.y - 4} width="6" height="5" rx="1" fill="#f8fafc" />}
                 </g>
             );
         }
 
         function AmsNode({ n }) {
-            const colors = SPOOL_COLORS;
-            if (n.variant === 'ams_lite') {
-                return (
-                    <g>
-                        <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#334155" side="#020617" />
-                        <rect x={n.x + n.w / 2 - 8} y={n.y} width="16" height={n.h} rx="3" fill="#1e293b" stroke="#334155" />
-                        {[0, 1, 2, 3].map((i) => (
-                            <circle key={i} cx={n.x + n.w / 2} cy={n.y + 16 + i * 26} r="11" fill="none" stroke={colors[i]} strokeWidth="5" />
-                        ))}
-                        {n.guard && [0, 1, 2, 3].map((i) => (
-                            <rect key={'g'+i} x={n.x + n.w - 12} y={n.y + 12 + i * 26} width="7" height="8" rx="1" fill="#f8fafc" filter="url(#glow)" />
-                        ))}
-                    </g>
-                );
-            }
-            if (n.variant === 'ams_ht') {
-                return (
-                    <g>
-                        <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#475569" side="#020617" />
-                        <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="8" fill="#1e293b" stroke="#f97316" strokeWidth="1.5" />
-                        <circle cx={n.x + n.w / 2} cy={n.y + n.h / 2} r="16" fill="none" stroke={colors[n.index % colors.length]} strokeWidth="7" />
-                        <rect x={n.x + 8} y={n.y + 6} width={n.w - 16} height="8" rx="2" fill="#0f172a" />
-                        {n.guard && <rect x={n.x + n.w / 2 - 4} y={n.y + n.h - 12} width="8" height="7" rx="1" fill="#f8fafc" />}
-                    </g>
-                );
-            }
+            if (n.variant === 'ams_lite') return <AmsLiteNode n={n} />;
+            if (n.variant === 'ams_ht') return <AmsHtNode n={n} />;
             if (n.variant === 'ace' || n.variant === 'vivid') {
                 return (
                     <g>
                         <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#334155" side="#020617" />
                         <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="5" fill="#111827" stroke="#64748b" />
+                        <rect x={n.x + 6} y={n.y + 6} width={n.w - 12} height={n.h * 0.42} rx="3" fill="url(#amsLid)" stroke="#475569" />
                         {[0, 1, 2, 3].map((i) => (
-                            <rect key={i} x={n.x + 10} y={n.y + 10 + i * 9} width={n.w - 20} height="4" rx="1" fill="#334155" />
+                            <rect key={i} x={n.x + 10} y={n.y + n.h * 0.55 + i * 8} width={n.w - 20} height="4" rx="1" fill="#334155" />
                         ))}
                         <text x={n.x + n.w / 2} y={n.y + n.h - 8} textAnchor="middle" fill="#94a3b8" fontSize="7">{n.variant === 'ace' ? 'ACE' : 'ViViD'}</text>
                     </g>
                 );
             }
-            const slots = 4;
-            const slotW = (n.w - 16) / slots;
-            const pro = n.variant === 'ams_2_pro';
-            return (
-                <g>
-                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top={pro ? '#1e293b' : '#334155'} side="#020617" />
-                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="6" fill="#1e293b" stroke="#334155" strokeWidth="2" />
-                    <rect x={n.x} y={n.y} width={n.w} height={pro ? 10 : 7} fill="#0f172a" opacity={pro ? 0.85 : 1} />
-                    {Array.from({ length: slots }).map((_, i) => (
-                        <rect key={i} x={n.x + 8 + i * slotW} y={n.y + 14} width={slotW - 6} height={n.h - 22} rx="3" fill={colors[i % colors.length]} opacity="0.85" />
-                    ))}
-                    {n.guard && Array.from({ length: slots }).map((_, i) => (
-                        <rect key={'g'+i} x={n.x + 12 + i * slotW} y={n.y + n.h - 8} width="8" height="7" rx="1" fill="#f8fafc" filter="url(#glow)" />
-                    ))}
-                    {pro && <rect className="led-pulse" x={n.x + 6} y={n.y + 2} width="20" height="5" rx="1" fill="#22d3ee" filter="url(#glow)" />}
-                </g>
-            );
+            return <EnclosedAmsNode n={n} />;
         }
 
         function TouchNode({ n }) {
@@ -955,13 +1151,77 @@
             side: 'Beside printer'
         };
 
+        function parseConfigFromUrl(search) {
+            const q = new URLSearchParams(search || window.location.search);
+            const printerId = q.get('p');
+            const printer = PP.CATALOG.printers.find((p) => p.id === printerId);
+            if (!printer) return null;
+
+            const compat = new Set(PP.compatibleAccessories(printerId).map((a) => a.id));
+            let accessories = new Set();
+            (q.get('a') || '').split(',').forEach((raw) => {
+                const id = raw.trim();
+                if (!compat.has(id)) return;
+                const acc = PP.CATALOG.accessories.find((x) => x.id === id);
+                if (acc && acc.category === 'storage') accessories = PP.applyFurnitureToggle(accessories, id);
+                else accessories.add(id);
+            });
+
+            const rawAms = q.get('ams') || 'none';
+            const amsOk = PP.CATALOG.amsUnits.find((u) => u.id === rawAms && u.compat && u.compat.includes(printerId));
+            const amsId = amsOk ? rawAms : 'none';
+            const ams = PP.CATALOG.amsUnits.find((u) => u.id === amsId);
+            let amsQty = 0;
+            if (ams && ams.id !== 'none') {
+                const n = parseInt(q.get('q') || '1', 10);
+                amsQty = Math.min(ams.maxQty || 1, Math.max(1, Number.isFinite(n) ? n : 1));
+            }
+            const locs = PP.availableAmsLocations(printer, ams, accessories);
+            const loc = q.get('loc') || '';
+            const amsLocation = locs.includes(loc) ? loc : (PP.defaultAmsLocation(printer, ams, accessories) || 'none');
+            return { printerId, accessories, amsId, amsQty, amsLocation };
+        }
+
+        function configSearch(state) {
+            const url = new URL(window.location.href);
+            ['p', 'a', 'ams', 'q', 'loc'].forEach((k) => url.searchParams.delete(k));
+            if (!state || !state.printerId) return url.pathname + (url.hash || '');
+            url.searchParams.set('p', state.printerId);
+            const acc = [...(state.accessories || [])].sort().join(',');
+            if (acc) url.searchParams.set('a', acc);
+            if (state.amsId && state.amsId !== 'none') {
+                url.searchParams.set('ams', state.amsId);
+                url.searchParams.set('q', String(state.amsQty > 0 ? state.amsQty : 1));
+                if (state.amsLocation && state.amsLocation !== 'none') url.searchParams.set('loc', state.amsLocation);
+            }
+            return url.pathname + url.search + (url.hash || '');
+        }
+
+        function applyConfigState(parsed, setters) {
+            if (!parsed) {
+                setters.setSelectedPrinterId(null);
+                setters.setSelectedAccessories(new Set());
+                setters.setAmsId('none');
+                setters.setAmsQty(0);
+                setters.setAmsLocation('none');
+                return;
+            }
+            setters.setSelectedPrinterId(parsed.printerId);
+            setters.setSelectedAccessories(new Set(parsed.accessories));
+            setters.setAmsId(parsed.amsId);
+            setters.setAmsQty(parsed.amsId === 'none' ? 0 : (parsed.amsQty || 1));
+            setters.setAmsLocation(parsed.amsLocation);
+        }
+
         const App = () => {
-            const [selectedPrinterId, setSelectedPrinterId] = useState(null);
-            const [selectedAccessories, setSelectedAccessories] = useState(new Set());
-            const [amsId, setAmsId] = useState('none');
-            const [amsQty, setAmsQty] = useState(1);
-            const [amsLocation, setAmsLocation] = useState('none');
+            const boot = parseConfigFromUrl();
+            const [selectedPrinterId, setSelectedPrinterId] = useState(boot ? boot.printerId : null);
+            const [selectedAccessories, setSelectedAccessories] = useState(boot ? boot.accessories : new Set());
+            const [amsId, setAmsId] = useState(boot ? boot.amsId : 'none');
+            const [amsQty, setAmsQty] = useState(boot ? (boot.amsQty || 1) : 1);
+            const [amsLocation, setAmsLocation] = useState(boot ? boot.amsLocation : 'none');
             const [showRefPhoto, setShowRefPhoto] = useState(false);
+            const [linkCopied, setLinkCopied] = useState(false);
 
             const printer = PP.CATALOG.printers.find((p) => p.id === selectedPrinterId);
 
@@ -995,6 +1255,83 @@
                     setAmsLocation(cfg.amsLocation);
                 }
             }, [cfg.amsLocation]);
+
+            const skipUrlWrite = useRef(false);
+            const hadPrinter = useRef(!!boot);
+
+            useEffect(() => {
+                document.title = printer ? `${printer.name} · PandaPlanner` : 'PandaPlanner';
+            }, [printer]);
+
+            useEffect(() => {
+                if (skipUrlWrite.current) {
+                    skipUrlWrite.current = false;
+                    hadPrinter.current = !!selectedPrinterId;
+                    return;
+                }
+                const next = configSearch({
+                    printerId: selectedPrinterId,
+                    accessories: selectedAccessories,
+                    amsId,
+                    amsQty,
+                    amsLocation
+                });
+                const current = window.location.pathname + window.location.search + (window.location.hash || '');
+                if (next === current) {
+                    hadPrinter.current = !!selectedPrinterId;
+                    return;
+                }
+                if (selectedPrinterId && !hadPrinter.current) history.pushState({ pp: 1 }, '', next);
+                else history.replaceState({ pp: 1 }, '', next);
+                hadPrinter.current = !!selectedPrinterId;
+            }, [selectedPrinterId, selectedAccessories, amsId, amsQty, amsLocation]);
+
+            useEffect(() => {
+                const onPop = () => {
+                    skipUrlWrite.current = true;
+                    applyConfigState(parseConfigFromUrl(), {
+                        setSelectedPrinterId,
+                        setSelectedAccessories,
+                        setAmsId,
+                        setAmsQty,
+                        setAmsLocation
+                    });
+                    hadPrinter.current = !!parseConfigFromUrl();
+                };
+                window.addEventListener('popstate', onPop);
+                return () => window.removeEventListener('popstate', onPop);
+            }, []);
+
+            const resetToPicker = () => {
+                setSelectedPrinterId(null);
+                setSelectedAccessories(new Set());
+                setAmsId('none');
+                setAmsQty(0);
+                setAmsLocation('none');
+            };
+
+            const copyConfigLink = async () => {
+                const path = configSearch({
+                    printerId: selectedPrinterId,
+                    accessories: selectedAccessories,
+                    amsId,
+                    amsQty,
+                    amsLocation
+                });
+                const href = window.location.origin + path;
+                try {
+                    await navigator.clipboard.writeText(href);
+                } catch (err) {
+                    const ta = document.createElement('textarea');
+                    ta.value = href;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                }
+                setLinkCopied(true);
+                window.setTimeout(() => setLinkCopied(false), 1600);
+            };
 
             const startPrinter = (id) => {
                 const p = PP.CATALOG.printers.find((x) => x.id === id);
@@ -1079,7 +1416,7 @@
                 <div className="min-h-screen flex flex-col">
                     <header className="border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
                         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedPrinterId(null)}>
+                            <div className="flex items-center gap-3 cursor-pointer" onClick={resetToPicker}>
                                 <img src="img/logo.png" alt="" className="w-9 h-9 rounded-lg shrink-0" />
                                 <div>
                                     <h1 className="text-xl font-black tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
@@ -1121,7 +1458,7 @@
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
                                 <div className="col-span-1 lg:col-span-4 flex flex-col space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <button onClick={() => setSelectedPrinterId(null)} className="text-sm font-semibold text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+                                        <button onClick={resetToPicker} className="text-sm font-semibold text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
                                             <Icons.ChevronLeft className="w-4 h-4"/> Back
                                         </button>
                                         <button onClick={() => toggleGroup(upgradeIds)} className="text-xs font-bold text-emerald-400 hover:text-emerald-300 uppercase tracking-wider px-3 py-1 rounded bg-emerald-500/10">
@@ -1239,7 +1576,15 @@
                                 <div className="col-span-1 lg:col-span-3">
                                     <div className="sticky top-24 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl flex flex-col max-h-[calc(100vh-8rem)]">
                                         <h3 className="text-xl font-bold text-white mb-2">Your configuration</h3>
-                                        <p className="text-[11px] text-slate-500 font-mono mb-4">{cfg.footprint}</p>
+                                        <p className="text-[11px] text-slate-500 font-mono mb-3">{cfg.footprint}</p>
+                                        <button
+                                            type="button"
+                                            onClick={copyConfigLink}
+                                            className="mb-4 w-full text-xs font-semibold text-slate-300 hover:text-white border border-slate-700 hover:border-emerald-500/50 bg-slate-800/70 rounded-lg px-3 py-2 flex items-center justify-center gap-2 transition-colors"
+                                        >
+                                            <Icons.Link className="w-3.5 h-3.5" />
+                                            {linkCopied ? 'Link copied' : 'Copy link to this setup'}
+                                        </button>
 
                                         {bomAccessories.length === 0 && !amsLine ? (
                                             <div className="text-slate-500 text-center py-12 flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-800 rounded-xl">

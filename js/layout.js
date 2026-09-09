@@ -20,9 +20,9 @@
         feed_rack: { w: 635, d: 330, h: 1320 },
         popcap: { w: 421, d: 506, h: 315 },
         touch: { w: 140, d: 22, h: 88 },
-        ams: { w: 372, d: 280, h: 226 },
+        ams: { w: 368, d: 283, h: 224 },
         ams_2_pro: { w: 372, d: 280, h: 226 },
-        ams_lite: { w: 208, d: 397, h: 342 },
+        ams_lite: { w: 397, d: 208, h: 342 },
         ams_ht: { w: 114, d: 280, h: 245 },
         ace: { w: 360, d: 260, h: 190 },
         vivid: { w: 360, d: 260, h: 190 }
@@ -57,8 +57,12 @@
         return { w: px(fp.w), h: px(fp.h), isoX: ISO.x, isoY: ISO.y };
     }
 
-    function amsSize(id) {
-        return SIZES.ams[id] || SIZES.ams.ams;
+    function amsSize(id, placement) {
+        const s = SIZES.ams[id] || SIZES.ams.ams;
+        if (id === 'ams_ht' && placement === 'side') {
+            return { w: px(MM.ams_ht.d), h: px(MM.ams_ht.h) };
+        }
+        return s;
     }
 
     PP.buildScene = function (cfg) {
@@ -144,7 +148,7 @@
             });
 
             if (cfg.ams.id !== 'none' && cfg.amsLocation === 'stack_tray') {
-                const aSize = amsSize(cfg.ams.id);
+                const aSize = amsSize(cfg.ams.id, 'stack_tray');
                 const qty = Math.min(cfg.amsQty, 2);
                 const gap = 10;
                 const aw = Math.min(aSize.w, (st.w - 16 - gap * (qty - 1)) / qty);
@@ -160,7 +164,8 @@
                         h: aSize.h,
                         variant: cfg.ams.id,
                         guard: upgrades.ams_guard,
-                        index: i
+                        index: i,
+                        placement: 'stack_tray'
                     });
                     ax += aw + gap;
                 }
@@ -198,7 +203,7 @@
             nodes.push({ kind: 'perch', x: px, y: py, w: perch.w, h: perch.h, variant: family === 'h2' ? 'h2' : 'x1' });
 
             if (cfg.ams.id !== 'none' && cfg.amsLocation === 'perch') {
-                const aSize = amsSize(cfg.ams.id);
+                const aSize = amsSize(cfg.ams.id, 'perch');
                 const qty = Math.min(cfg.amsQty, cfg.ams.id === 'ams_ht' ? 4 : 2);
                 const gap = 8;
                 const totalW = qty * Math.min(aSize.w, perch.w / qty - 4) + (qty - 1) * gap;
@@ -213,13 +218,14 @@
                         h: aSize.h,
                         variant: cfg.ams.id,
                         guard: upgrades.ams_guard,
-                        index: i
+                        index: i,
+                        placement: 'perch'
                     });
                     ax += aw + gap;
                 }
             }
         } else if (cfg.ams.id !== 'none' && cfg.amsLocation === 'on_printer') {
-            const aSize = amsSize(cfg.ams.id);
+            const aSize = amsSize(cfg.ams.id, 'on_printer');
             const qty = Math.min(cfg.amsQty, 2);
             const gap = 8;
             const aw = Math.min(aSize.w, pSize.w - 16);
@@ -235,22 +241,30 @@
                     variant: cfg.ams.id,
                     guard: upgrades.ams_guard,
                     index: i,
-                    onLid: true
+                    onLid: true,
+                    placement: 'on_printer'
                 });
                 ax += aw + gap;
             }
         } else if (cfg.ams.id !== 'none' && cfg.amsLocation === 'side') {
-            const aSize = amsSize(cfg.ams.id);
-            nodes.push({
-                kind: 'ams',
-                x: printerX + pSize.w + 18,
-                y: printerY + pSize.h - aSize.h - 8,
-                w: aSize.w,
-                h: aSize.h,
-                variant: cfg.ams.id,
-                guard: upgrades.ams_guard,
-                index: 0
-            });
+            const aSize = amsSize(cfg.ams.id, 'side');
+            const qty = Math.min(cfg.amsQty, cfg.ams.id === 'ams_ht' ? 4 : 1);
+            const gap = 10;
+            let ax = printerX + pSize.w + 18;
+            for (let i = 0; i < qty; i++) {
+                nodes.push({
+                    kind: 'ams',
+                    x: ax,
+                    y: printerY + pSize.h - aSize.h - 8,
+                    w: aSize.w,
+                    h: aSize.h,
+                    variant: cfg.ams.id,
+                    guard: upgrades.ams_guard,
+                    index: i,
+                    placement: 'side'
+                });
+                ax += aSize.w + gap;
+            }
         }
 
         if (hasFeed) {
