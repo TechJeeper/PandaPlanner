@@ -156,6 +156,7 @@
         if (selected.has('popstation_mini_wheels')) parts.push('PopStation Mini wheels');
         if (selected.has('panda_cushion_xp')) parts.push('Panda Cushion XP');
         if (selected.has('panda_station_lighting_kit')) parts.push('Station lighting kit');
+        if (selected.has('panda_vent')) parts.push('Panda Vent RGB');
         return parts.join(' · ');
     };
 
