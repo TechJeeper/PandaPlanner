@@ -114,7 +114,9 @@
                 variant: stationNaked ? 'naked' : 'enclosed',
                 showAms: cfg.amsLocation === 'station_drawer' && cfg.ams.id !== 'none',
                 amsId: cfg.ams.id,
-                amsQty: cfg.amsQty
+                amsQty: cfg.amsQty,
+                airCushion: upgrades.station_cushion,
+                lightingKit: upgrades.station_lighting
             });
             supportLeft = x + 16;
             supportW = st.w - 32;
@@ -296,7 +298,8 @@
                 x: rightEdge + 40,
                 y: floorY - ps.h,
                 w: ps.w,
-                h: ps.h
+                h: ps.h,
+                wheels: upgrades.popstation_wheels
             });
         }
 
