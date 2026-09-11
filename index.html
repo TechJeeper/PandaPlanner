@@ -616,6 +616,35 @@
             );
         }
 
+        function PopstationMiniNode({ n }) {
+            const drawerGap = 8;
+            const drawerH = (n.h - drawerGap - 22) / 2;
+            const spoolColors = ['#eab308', '#3b82f6', '#22c55e', '#ef4444'];
+            return (
+                <g>
+                    <ellipse cx={n.x + n.w / 2} cy={n.y + n.h + 3} rx={n.w * 0.45} ry="6" fill="#0ea5e9" opacity="0.16" filter="url(#glow)" />
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#3f3f46" side="#18181b" />
+                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="5" fill="url(#matteBlack)" stroke="#09090b" strokeWidth="1.5" />
+                    {[0, 1].map((row) => {
+                        const y = n.y + 8 + row * (drawerH + drawerGap);
+                        return (
+                            <g key={row}>
+                                <rect x={n.x + 7} y={y} width={n.w - 14} height={drawerH} rx="4" fill="#111113" stroke="#3f3f46" />
+                                <rect x={n.x + 14} y={y + 8} width={n.w - 28} height={drawerH - 22} rx="3" fill="#020617" stroke="#22d3ee" strokeOpacity="0.55" />
+                                {[0, 1].map((column) => {
+                                    const cx = n.x + n.w * (0.3 + column * 0.4);
+                                    const cy = y + drawerH * 0.45;
+                                    return <FilamentSpool key={column} cx={cx} cy={cy} r={Math.min(drawerH * 0.24, n.w * 0.12)} color={spoolColors[row * 2 + column]} />;
+                                })}
+                                <PullHandle x={n.x + n.w / 2 - 19} y={y + drawerH - 10} w="38" />
+                            </g>
+                        );
+                    })}
+                    <BrandLine x={n.x + 12} y={n.y + n.h - 8} title="PopStation Mini" />
+                </g>
+            );
+        }
+
         function FilamentSpool({ cx, cy, r, color }) {
             return (
                 <g>
@@ -1149,7 +1178,7 @@
         }
 
         function SceneVisualizer({ scene }) {
-            const order = ['desk', 'station', 'stack', 'den', 'feed_rack', 'printer', 'perch', 'ams', 'touch'];
+            const order = ['desk', 'station', 'stack', 'den', 'feed_rack', 'popstation_mini', 'printer', 'perch', 'ams', 'touch'];
             const sorted = [...scene.nodes].sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
             return (
                 <svg viewBox={scene.viewBox} preserveAspectRatio="xMidYMid meet" className="w-full h-full drop-shadow-2xl">
@@ -1162,6 +1191,7 @@
                         if (n.kind === 'stack') return <StackNode key={key} n={n} />;
                         if (n.kind === 'perch') return <PerchNode key={key} n={n} />;
                         if (n.kind === 'feed_rack') return <FeedRackNode key={key} n={n} />;
+                        if (n.kind === 'popstation_mini') return <PopstationMiniNode key={key} n={n} />;
                         if (n.kind === 'ams') return <AmsNode key={key} n={n} />;
                         if (n.kind === 'touch') return <TouchNode key={key} n={n} />;
                         if (n.kind === 'printer') return <PrinterNode key={key} n={n} />;

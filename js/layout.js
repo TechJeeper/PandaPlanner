@@ -18,6 +18,7 @@
         perch: { w: 396, d: 360, h: 136 },
         perch_h2: { w: 754, d: 460, h: 145 },
         feed_rack: { w: 635, d: 330, h: 1320 },
+        popstation_mini: { w: 460, d: 330, h: 430 },
         popcap: { w: 421, d: 506, h: 315 },
         touch: { w: 140, d: 22, h: 88 },
         ams: { w: 368, d: 283, h: 224 },
@@ -36,6 +37,7 @@
         perch: { w: px(MM.perch.w), h: px(MM.perch.h) },
         perch_h2: { w: px(MM.perch_h2.w), h: px(MM.perch_h2.h) },
         feed_rack: { w: px(MM.feed_rack.w), h: px(MM.feed_rack.h) },
+        popstation_mini: { w: px(MM.popstation_mini.w), h: px(MM.popstation_mini.h) },
         popcapH: px(MM.popcap.h),
         touch: { w: px(MM.touch.w), h: px(MM.touch.h) },
         ams: {
@@ -82,6 +84,7 @@
         const hasStack = selected.has('panda_stack');
         const hasPerch = selected.has('panda_perch') || selected.has('panda_perch_h2');
         const hasFeed = selected.has('panda_feed_rack');
+        const hasPopstationMini = family === 'u1' && selected.has('popstation_mini');
         const upgrades = {};
         PP.CATALOG.accessories.forEach((a) => {
             if (selected.has(a.id) && a.slot) upgrades[a.slot] = true;
@@ -279,6 +282,21 @@
                 y: floorY - fr.h,
                 w: fr.w,
                 h: fr.h
+            });
+        }
+
+        if (hasPopstationMini) {
+            const ps = SIZES.popstation_mini;
+            const rightEdge = Math.max(
+                printerX + pSize.w + (pSize.isoX || ISO.x),
+                ...nodes.filter((n) => n.kind !== 'desk').map((n) => n.x + n.w + (n.isoX || 0))
+            );
+            nodes.push({
+                kind: 'popstation_mini',
+                x: rightEdge + 40,
+                y: floorY - ps.h,
+                w: ps.w,
+                h: ps.h
             });
         }
 
