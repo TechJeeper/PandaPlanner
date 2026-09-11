@@ -135,6 +135,7 @@
         popcap: { variantId: 42639960834146, handle: 'biqu-popcap-snapmaker-u1-top-cover' },
         panda_diaper: { variantId: 42480766222434, handle: 'biqu-panda-diaper-waste-pads-reusable-easy-clean-full-coverage-for-snapmaker-u1' },
         popstation_mini: { handle: 'biqu-popstation-mini-sealed-dual-drawer-storage-cabinet-for-4-filament-spools', storeOnly: true },
+        popstation_mini_wheels: { handle: 'biqu-popstation-mini-sealed-dual-drawer-storage-cabinet-for-4-filament-spools', storeOnly: true },
         panda_breath: { variantId: 42353406312546, handle: 'biqu-panda-breath-smart-chamber-heater' },
         panda_guard: { variantId: 41897387917410, handle: 'biqu-ams-upgrades-multi-material' },
         panda_status: { variantId: 42177112735842, handle: 'biqu-panda-status-magnetic-mount-customizable-rgb' },
@@ -165,6 +166,8 @@
                 h2: 42177060765794
             }
         },
+        panda_cushion_xp: { handle: 'biqu-panda-verse-storage-solution-for-x1-p1', storeOnly: true },
+        panda_station_lighting_kit: { handle: 'biqu-panda-verse-storage-solution-for-x1-p1', storeOnly: true },
         panda_den_air: { variantId: 42589422125154, handle: 'biqu-panda-den-air-storage-box' },
         panda_den_h2: { variantId: 42589450797154, handle: 'biqu-panda-den-h2-storage-box' },
         panda_stack: { variantId: 42302084120674, handle: 'biqu-panda-stack-multi-device-storage-durable-diy' },
