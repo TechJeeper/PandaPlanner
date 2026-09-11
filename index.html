@@ -629,14 +629,14 @@
                 <g>
                     <ellipse cx={n.x + n.w / 2} cy={floorY + (n.wheels ? 12 : 3)} rx={n.w * 0.45} ry="6" fill="#0ea5e9" opacity="0.16" filter="url(#glow)" />
                     {n.wheels && [n.x + 20, n.x + n.w - 20].map((cx) => <Caster key={cx} cx={cx} cy={floorY + 10} />)}
-                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#3f3f46" side="#18181b" />
-                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="5" fill="url(#matteBlack)" stroke="#09090b" strokeWidth="1.5" />
+                    <IsoExtrude x={n.x} y={n.y} w={n.w} h={n.h} top="#f8fafc" side="#cbd5e1" />
+                    <rect x={n.x} y={n.y} width={n.w} height={n.h} rx="5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
                     {[0, 1].map((row) => {
                         const y = n.y + 8 + row * (drawerH + drawerGap);
                         return (
                             <g key={row}>
-                                <rect x={n.x + 7} y={y} width={n.w - 14} height={drawerH} rx="4" fill="#111113" stroke="#3f3f46" />
-                                <rect x={n.x + 14} y={y + 8} width={n.w - 28} height={drawerH - 22} rx="3" fill="#020617" stroke="#22d3ee" strokeOpacity="0.55" />
+                                <rect x={n.x + 7} y={y} width={n.w - 14} height={drawerH} rx="4" fill="#e5e7eb" stroke="#94a3b8" />
+                                <rect x={n.x + 14} y={y + 8} width={n.w - 28} height={drawerH - 22} rx="3" fill="#475569" stroke="#64748b" strokeOpacity="0.8" />
                                 {[0, 1].map((column) => {
                                     const cx = n.x + n.w * (0.3 + column * 0.4);
                                     const cy = y + drawerH * 0.45;
