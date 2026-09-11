@@ -142,6 +142,7 @@
         }
 
         if (selected.has('panda_feed_rack')) parts.push('Feed Rack beside station');
+        if (selected.has('popstation_mini')) parts.push('PopStation Mini on floor');
         return parts.join(' · ');
     };
 
@@ -163,6 +164,7 @@
         }
         if (hasAny(PERCH_IDS, selected)) h += 140;
         if (selected.has('panda_feed_rack')) w += 420;
+        if (selected.has('popstation_mini')) w += 460;
         return w + ' × ' + d + ' × ~' + h + ' mm (W×D×H, stacked)';
     };
 
