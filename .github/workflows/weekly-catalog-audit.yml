@@ -21,7 +21,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [ -s missing-products.txt ]; then
+          if [ -s missing-products.txt ] && ! gh issue list --state open --search '"Catalog audit: unrepresented Panda or Snapmaker products" in:title' --json number --jq 'length > 0' | grep -q true; then
             gh issue create \
               --title "Catalog audit: unrepresented Panda or Snapmaker products" \
               --body-file missing-products.txt
