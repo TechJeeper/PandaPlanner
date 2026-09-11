@@ -1286,6 +1286,11 @@
             const [amsLocation, setAmsLocation] = useState(boot ? boot.amsLocation : 'none');
             const [showRefPhoto, setShowRefPhoto] = useState(false);
             const [linkCopied, setLinkCopied] = useState(false);
+            const [storeProductsLoaded, setStoreProductsLoaded] = useState(false);
+
+            useEffect(() => {
+                PP.loadStoreProductData().finally(() => setStoreProductsLoaded(true));
+            }, []);
 
             const printer = PP.CATALOG.printers.find((p) => p.id === selectedPrinterId);
 

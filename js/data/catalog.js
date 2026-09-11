@@ -134,8 +134,8 @@
         },
         popcap: { variantId: 42639960834146, handle: 'biqu-popcap-snapmaker-u1-top-cover' },
         panda_diaper: { variantId: 42480766222434, handle: 'biqu-panda-diaper-waste-pads-reusable-easy-clean-full-coverage-for-snapmaker-u1' },
-        popstation_mini: { handle: 'biqu-popstation-mini-sealed-dual-drawer-storage-cabinet-for-4-filament-spools', storeOnly: true },
-        popstation_mini_wheels: { handle: 'biqu-popstation-mini-sealed-dual-drawer-storage-cabinet-for-4-filament-spools', storeOnly: true },
+        popstation_mini: { handle: 'biqu-popstation-mini-sealed-dual-drawer-storage-cabinet-for-4-filament-spools', loadProduct: true },
+        popstation_mini_wheels: { handle: 'biqu-popstation-mini-sealed-dual-drawer-storage-cabinet-for-4-filament-spools', storeOnly: true, loadProduct: true },
         panda_breath: { variantId: 42353406312546, handle: 'biqu-panda-breath-smart-chamber-heater' },
         panda_guard: { variantId: 41897387917410, handle: 'biqu-ams-upgrades-multi-material' },
         panda_status: { variantId: 42177112735842, handle: 'biqu-panda-status-magnetic-mount-customizable-rgb' },
@@ -166,8 +166,8 @@
                 h2: 42177060765794
             }
         },
-        panda_cushion_xp: { handle: 'biqu-panda-verse-storage-solution-for-x1-p1', storeOnly: true },
-        panda_station_lighting_kit: { handle: 'biqu-panda-verse-storage-solution-for-x1-p1', storeOnly: true },
+        panda_cushion_xp: { handle: 'biqu-panda-verse-storage-solution-for-x1-p1', storeOnly: true, loadProduct: true },
+        panda_station_lighting_kit: { handle: 'biqu-panda-verse-storage-solution-for-x1-p1', storeOnly: true, loadProduct: true },
         panda_den_air: { variantId: 42589422125154, handle: 'biqu-panda-den-air-storage-box' },
         panda_den_h2: { variantId: 42589450797154, handle: 'biqu-panda-den-h2-storage-box' },
         panda_stack: { variantId: 42302084120674, handle: 'biqu-panda-stack-multi-device-storage-durable-diy' },
@@ -220,5 +220,27 @@
         });
         if (!pairs.length) return null;
         return PP.affiliateUrl('https://biqu.equipment/cart/' + pairs.join(','));
+    };
+
+    PP.loadStoreProductData = async function () {
+        const entries = Object.entries(PP.CART).filter(([, cart]) => cart.loadProduct);
+        const products = await Promise.all(entries.map(async ([id, cart]) => {
+            try {
+                const response = await fetch('https://biqu.equipment/products/' + cart.handle + '.js');
+                if (!response.ok) return null;
+                return { id, cart, product: await response.json() };
+            } catch (_) {
+                return null;
+            }
+        }));
+
+        products.filter(Boolean).forEach(({ id, cart, product }) => {
+            const accessory = PP.CATALOG.accessories.find((item) => item.id === id);
+            if (accessory && product.featured_image) accessory.photo = product.featured_image;
+            if (!cart.storeOnly) {
+                const variant = product.variants && (product.variants.find((item) => item.available) || product.variants[0]);
+                if (variant) cart.variantId = variant.id;
+            }
+        });
     };
 })(window);
