@@ -18,7 +18,7 @@
         perch: { w: 396, d: 360, h: 136 },
         perch_h2: { w: 754, d: 460, h: 145 },
         feed_rack: { w: 635, d: 330, h: 1320 },
-        popstation_mini: { w: 460, d: 330, h: 430 },
+        popstation_mini: { w: 456, d: 422, h: 428, caster: 61 },
         popcap: { w: 421, d: 506, h: 315 },
         touch: { w: 140, d: 22, h: 88 },
         ams: { w: 368, d: 283, h: 224 },
@@ -37,7 +37,7 @@
         perch: { w: px(MM.perch.w), h: px(MM.perch.h) },
         perch_h2: { w: px(MM.perch_h2.w), h: px(MM.perch_h2.h) },
         feed_rack: { w: px(MM.feed_rack.w), h: px(MM.feed_rack.h) },
-        popstation_mini: { w: px(MM.popstation_mini.w), h: px(MM.popstation_mini.h) },
+        popstation_mini: { w: px(MM.popstation_mini.w), h: px(MM.popstation_mini.h), casterH: px(MM.popstation_mini.caster) },
         popcapH: px(MM.popcap.h),
         touch: { w: px(MM.touch.w), h: px(MM.touch.h) },
         ams: {
@@ -135,7 +135,21 @@
         let printerY;
         const popcapH = family === 'u1' && selected.has('popcap') ? SIZES.popcapH : 0;
 
-        if (hasStack) {
+        if (hasPopstationMini) {
+            const ps = SIZES.popstation_mini;
+            const popstationY = floorY - ps.h - (upgrades.popstation_wheels ? ps.casterH : 0);
+            printerX = centerX - pSize.w / 2;
+            printerY = popstationY - pSize.h - popcapH;
+            y = printerY;
+            nodes.push({
+                kind: 'popstation_mini',
+                x: centerX - ps.w / 2,
+                y: popstationY,
+                w: ps.w,
+                h: ps.h,
+                wheels: upgrades.popstation_wheels
+            });
+        } else if (hasStack) {
             const st = SIZES.stack;
             const stackX = centerX - st.w / 2;
             const stackBottom = y;
@@ -287,21 +301,6 @@
             });
         }
 
-        if (hasPopstationMini) {
-            const ps = SIZES.popstation_mini;
-            const rightEdge = Math.max(
-                printerX + pSize.w + (pSize.isoX || ISO.x),
-                ...nodes.filter((n) => n.kind !== 'desk').map((n) => n.x + n.w + (n.isoX || 0))
-            );
-            nodes.push({
-                kind: 'popstation_mini',
-                x: rightEdge + 40,
-                y: floorY - ps.h,
-                w: ps.w,
-                h: ps.h,
-                wheels: upgrades.popstation_wheels
-            });
-        }
 
         if (upgrades.screen) {
             nodes.push({

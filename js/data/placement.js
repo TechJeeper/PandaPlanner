@@ -125,6 +125,8 @@
         const parts = [];
         if (selected.has('panda_stack')) {
             parts.push(printer.name + ' on Panda Stack');
+        } else if (selected.has('popstation_mini')) {
+            parts.push(printer.name + ' on PopStation Mini');
         } else if (hasAny(STATION_IDS, selected) && hasAny(DEN_IDS, selected)) {
             const den = selected.has('panda_den_h2') ? 'Panda Den H2' : 'Panda Den Air';
             const st = selected.has('panda_station_naked') ? 'Naked Station' : 'Panda Station';
@@ -151,7 +153,6 @@
         }
 
         if (selected.has('panda_feed_rack')) parts.push('Feed Rack beside station');
-        if (selected.has('popstation_mini')) parts.push('PopStation Mini on floor');
         if (selected.has('popstation_mini_wheels')) parts.push('PopStation Mini wheels');
         if (selected.has('panda_cushion_xp')) parts.push('Panda Cushion XP');
         if (selected.has('panda_station_lighting_kit')) parts.push('Station lighting kit');
@@ -176,7 +177,11 @@
         }
         if (hasAny(PERCH_IDS, selected)) h += 140;
         if (selected.has('panda_feed_rack')) w += 420;
-        if (selected.has('popstation_mini')) w += 460;
+        if (selected.has('popstation_mini')) {
+            w = Math.max(w, 456);
+            d = Math.max(d, 422);
+            h += selected.has('popstation_mini_wheels') ? 489 : 428;
+        }
         return w + ' × ' + d + ' × ~' + h + ' mm (W×D×H, stacked)';
     };
 
