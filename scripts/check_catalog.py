@@ -27,6 +27,17 @@ def known_product_names():
     }
 
 
+def catalog_products_missing_images():
+    source = CATALOG.read_text(encoding="utf-8")
+    return sorted(
+        name
+        for name, photo in re.findall(
+            r"name: '([^']+)'.*?photo: '([^']*)'", source
+        )
+        if re.search(r"\b(panda|snapmaker)\b", name, re.I) and not photo
+    )
+
+
 def is_known(title, known):
     candidate = normalize(title)
     candidate_words = set(candidate.split())
@@ -49,14 +60,19 @@ def main():
         url = urljoin(url, next_link.group(1)) if next_link else None
 
     known = known_product_names()
-    missing = sorted(
+    missing_products = sorted(
         f"{product['title']} — https://biqu.equipment/products/{product['handle']}"
         for product in products
         if re.search(r"\b(panda|snapmaker)\b", product["title"], re.I)
         and not is_known(product["title"], known)
     )
+    missing_images = [
+        f"{name} — catalog entry has no product image"
+        for name in catalog_products_missing_images()
+    ]
+    missing = missing_products + missing_images
     if missing:
-        print("\n".join(missing))
+        print("\n".join(sorted(missing)))
 
 
 if __name__ == "__main__":
