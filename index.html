@@ -1681,7 +1681,9 @@
                                                 <div className="mt-auto space-y-2">
                                                     <div className="border-t border-slate-700 pt-4 mb-2">
                                                         <p className="text-xs text-slate-500 leading-relaxed">
-                                                            {biquCartUrl
+                                                            {!storeProductsLoaded && bomAccessories.some((a) => PP.CART[a.id] && PP.CART[a.id].loadProduct)
+                                                                ? 'Loading selected BIQU product details…'
+                                                                : biquCartUrl
                                                                 ? `${biquCartCount} Panda item${biquCartCount === 1 ? '' : 's'} will be added to your BIQU cart (default China warehouse SKU).`
                                                                 : 'Select Panda Verse furniture or upgrades to enable Add to Cart.'}
                                                         </p>
