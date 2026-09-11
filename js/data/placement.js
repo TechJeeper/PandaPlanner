@@ -97,6 +97,15 @@
         if (acc.requiresAms && (!amsId || amsId === 'none')) {
             return 'Requires an AMS unit';
         }
+        if (acc.requiresPopstationMini && !selected.has('popstation_mini')) {
+            return 'Requires BIQU PopStation Mini';
+        }
+        if (acc.requiresNakedStation && !selected.has('panda_station_naked')) {
+            return 'Requires Naked Panda Station';
+        }
+        if (acc.requiresStation && !hasAny(STATION_IDS, selected)) {
+            return 'Requires Panda Station';
+        }
         if (acc.id === 'panda_stack' && hasAny(STATION_IDS.concat(DEN_IDS), selected) && !selected.has('panda_stack')) {
             return 'Stack replaces Station / Den — the printer sits on the top shelf';
         }
@@ -143,6 +152,9 @@
 
         if (selected.has('panda_feed_rack')) parts.push('Feed Rack beside station');
         if (selected.has('popstation_mini')) parts.push('PopStation Mini on floor');
+        if (selected.has('popstation_mini_wheels')) parts.push('PopStation Mini wheels');
+        if (selected.has('panda_cushion_xp')) parts.push('Panda Cushion XP');
+        if (selected.has('panda_station_lighting_kit')) parts.push('Station lighting kit');
         return parts.join(' · ');
     };
 
