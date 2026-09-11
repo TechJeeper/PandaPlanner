@@ -166,7 +166,7 @@
                 h2: 42177060765794
             }
         },
-        panda_cushion_xp: { handle: 'biqu-panda-verse-storage-solution-for-x1-p1', storeOnly: true, loadProduct: true },
+        panda_cushion_xp: { handle: 'biqu-panda-verse-storage-solution-for-x1-p1', variantTitle: 'Panda Cushion XP', loadProduct: true },
         panda_station_lighting_kit: { handle: 'biqu-panda-verse-storage-solution-for-x1-p1', storeOnly: true, loadProduct: true },
         panda_den_air: { variantId: 42589422125154, handle: 'biqu-panda-den-air-storage-box' },
         panda_den_h2: { variantId: 42589450797154, handle: 'biqu-panda-den-h2-storage-box' },
@@ -238,7 +238,10 @@
             const accessory = PP.CATALOG.accessories.find((item) => item.id === id);
             if (accessory && product.featured_image) accessory.photo = product.featured_image;
             if (!cart.storeOnly) {
-                const variant = product.variants && (product.variants.find((item) => item.available) || product.variants[0]);
+                const matchingVariants = product.variants && (cart.variantTitle
+                    ? product.variants.filter((item) => item.title.toLowerCase().includes(cart.variantTitle.toLowerCase()))
+                    : product.variants);
+                const variant = matchingVariants && (matchingVariants.find((item) => item.available) || matchingVariants[0]);
                 if (variant) cart.variantId = variant.id;
             }
         });
