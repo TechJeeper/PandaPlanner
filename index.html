@@ -1612,7 +1612,7 @@
                                                         const disabledReason = PP.isAccessoryDisabled(acc, printer, selectedAccessories, amsId);
                                                         const locked = Boolean(disabledReason) && !isSelected;
                                                         return (
-                                                            <label key={acc.id} className={`flex items-start gap-3 p-3 rounded-xl border transition-all duration-300 ${locked ? 'opacity-40 cursor-not-allowed bg-slate-900/30 border-slate-800' : 'cursor-pointer'} ${isSelected ? (accent === 'indigo' ? 'bg-indigo-900/10 border-indigo-500/50' : 'bg-emerald-900/10 border-emerald-500/50') : 'bg-slate-900/50 border-slate-800 hover:border-slate-600'}`}>
+                                                            <label key={acc.id} onClick={(e) => { e.preventDefault(); if (!locked) toggleAccessory(acc.id); }} className={`flex items-start gap-3 p-3 rounded-xl border transition-all duration-300 ${locked ? 'opacity-40 cursor-not-allowed bg-slate-900/30 border-slate-800' : 'cursor-pointer'} ${isSelected ? (accent === 'indigo' ? 'bg-indigo-900/10 border-indigo-500/50' : 'bg-emerald-900/10 border-emerald-500/50') : 'bg-slate-900/50 border-slate-800 hover:border-slate-600'}`}>
                                                                 <input type="checkbox" className="hidden" checked={isSelected} disabled={locked} onChange={() => !locked && toggleAccessory(acc.id)} />
                                                                 <Photo src={acc.photo} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
                                                                 <div className="pt-1">
@@ -1654,7 +1654,7 @@
                                         <div className="relative z-10 flex-1 flex items-center justify-center pointer-events-none min-h-0">
                                             <SceneVisualizer scene={scene} />
                                         </div>
-                                        {showRefPhoto && furnitureSelected && furnitureSelected.photo && (
+                                        {showRefPhoto && (furnitureSelected?.photo || printer.photo) && (
                                             <div
                                                 className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in"
                                                 onClick={() => setShowRefPhoto(false)}
@@ -1664,7 +1664,7 @@
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <div className="flex justify-between items-center px-4 py-3 border-b border-slate-800">
-                                                        <h3 className="text-lg font-bold text-white">{furnitureSelected.name} Reference</h3>
+                                                        <h3 className="text-lg font-bold text-white">{(furnitureSelected && furnitureSelected.name) || printer.name} Reference</h3>
                                                         <button
                                                             onClick={() => setShowRefPhoto(false)}
                                                             className="text-slate-400 hover:text-white transition-colors p-1"
@@ -1674,8 +1674,8 @@
                                                     </div>
                                                     <div className="flex-1 overflow-hidden p-2 flex items-center justify-center min-h-[50vh]">
                                                         <Photo
-                                                            src={furnitureSelected.photo}
-                                                            alt={furnitureSelected.name}
+                                                            src={(furnitureSelected && furnitureSelected.photo) || printer.photo}
+                                                            alt={(furnitureSelected && furnitureSelected.name) || printer.name}
                                                             className="max-w-full max-h-full object-contain rounded-lg"
                                                         />
                                                     </div>
