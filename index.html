@@ -1103,13 +1103,16 @@
                     )}
                     <g transform={`translate(${fx + n.w / 2 - 16}, ${bodyY + 72})`}>
                         <rect width="32" height="36" rx="4" fill="#f8fafc" stroke="#f97316" strokeWidth="1.2" />
-                        {u.toolhead_front ? (
-                            <KnomiFace cx={16} cy={16} r={7} />
-                        ) : (
-                            <circle cx="16" cy="16" r="6" fill="#f59e0b" />
-                        )}
+                        <circle cx="16" cy="16" r="6" fill="#f59e0b" />
                         <rect x="8" y="26" width="16" height="10" fill={u.toolhead_internal ? '#ef4444' : '#27272a'} />
                     </g>
+                    {u.toolhead_front && (
+                        <g transform={`translate(${fx - 28}, ${bodyY + bodyH - 34})`}>
+                            <path d="M 4 24 L 4 4 Q 4 0 8 0 L 16 0 Q 20 0 20 4 L 20 24 Z" fill="#f1f5f9" stroke="#cbd5e1" opacity="0.8" />
+                            <KnomiFace cx={12} cy={10} r={8} />
+                            <rect x="8" y="20" width="8" height="4" rx="1" fill="#e2e8f0" stroke="#94a3b8" />
+                        </g>
+                    )}
                     {heads.map((color, i) => {
                         const dx = fx + 32 + i * 36;
                         return (
